@@ -66,6 +66,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     isAuthenticated: false,
     isLoading: true,
   });
+  const [isLoadingProfile, setIsLoadingProfile] = useState(false);
 
   // Initialisation au chargement de l'application
   useEffect(() => {
@@ -102,17 +103,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       (event, session) => {
         console.log('🔍 Auth state change:', event, session?.user?.email);
         
-        if (session?.user) {
-          setTimeout(() => {
-            loadUserProfile(session.user, session);
-          }, 0);
-        } else {
+        if (session?.user && !isLoadingProfile) {
+          loadUserProfile(session.user, session);
+        } else if (!session) {
           setAuthState({
             user: null,
             session: null,
             isAuthenticated: false,
             isLoading: false,
           });
+          setIsLoadingProfile(false);
         }
       }
     );
@@ -124,11 +124,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   // Fonction pour charger le profil utilisateur
   const loadUserProfile = async (supabaseUser: SupabaseUser, session: Session) => {
+    if (isLoadingProfile) return; // Éviter les chargements multiples
+    
+    setIsLoadingProfile(true);
     try {
       console.log('🔍 Chargement profil:', supabaseUser.email);
       
-      // Créer un utilisateur basique directement (sans dépendre de la table users)
-      console.log('ℹ️ Création d\'un utilisateur basique...');
       const user: User = {
         id: supabaseUser.id,
         email: supabaseUser.email!,
@@ -146,7 +147,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       });
     } catch (error) {
       console.error('❌ Erreur chargement profil:', error);
-      // Fallback avec données Supabase
       const user: User = {
         id: supabaseUser.id,
         email: supabaseUser.email!,
@@ -161,6 +161,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         isAuthenticated: true,
         isLoading: false,
       });
+    } finally {
+      setIsLoadingProfile(false);
     }
   };
 
