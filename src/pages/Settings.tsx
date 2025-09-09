@@ -81,41 +81,30 @@ const Settings: React.FC = () => {
     setMessage(null);
     
     try {
-      console.log('🗑️ Suppression du compte utilisateur:', user.id);
+      console.log('🗑️ Suppression complète du compte utilisateur:', user.id);
       
-      // 1. Supprimer tous les thèmes astraux
-      console.log('🔄 Suppression des thèmes astraux...');
-      const { error: chartsError } = await supabase
-        .from('astrology_charts')
-        .delete()
-        .eq('user_id', user.id);
+      // Utiliser la fonction SQL qui supprime complètement l'utilisateur
+      // y compris de auth.users
+      const { error } = await supabase.rpc('delete_user_completely', {
+        user_id: user.id
+      });
 
-      if (chartsError) {
-        console.error('Erreur suppression thèmes:', chartsError);
-        throw new Error('Erreur lors de la suppression des thèmes astraux');
+      if (error) {
+        console.error('Erreur suppression complète:', error);
+        throw new Error('Erreur lors de la suppression du compte');
       }
 
-      // 2. Supprimer l'utilisateur de la table users
-      console.log('🔄 Suppression du profil utilisateur...');
-      const { error: userError } = await supabase
-        .from('users')
-        .delete()
-        .eq('id', user.id);
-
-      if (userError) {
-        console.error('Erreur suppression profil:', userError);
-        throw new Error('Erreur lors de la suppression du profil');
-      }
-
-      // 3. Afficher le message de succès
+      console.log('✅ Compte supprimé avec succès de toutes les tables');
+      
+      // Afficher le message de succès
       setMessage({ type: 'success', text: 'Compte supprimé avec succès ! Redirection...' });
       
-      // 4. Attendre un peu pour que l'utilisateur voie le message
+      // Attendre un peu pour que l'utilisateur voie le message
       setTimeout(async () => {
-        // 5. Se déconnecter
+        // Se déconnecter
         await logout();
         
-        // 6. Rediriger vers l'accueil
+        // Rediriger vers l'accueil
         navigate('/', { replace: true });
       }, 2000);
       
