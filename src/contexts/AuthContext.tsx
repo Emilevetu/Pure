@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef, ReactNode } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { User as SupabaseUser, Session } from '@supabase/supabase-js';
 
@@ -66,105 +66,77 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     isAuthenticated: false,
     isLoading: true,
   });
-  const [isLoadingProfile, setIsLoadingProfile] = useState(false);
+  const lastHandledUserId = useRef<string | null>(null);
 
   // Initialisation au chargement de l'application
   useEffect(() => {
     console.log('🔍 AuthContext: Initialisation Supabase...');
-    
-    // Récupérer la session existante
-    const initializeAuth = async () => {
-      try {
-        const { data: { session }, error } = await supabase.auth.getSession();
-        
-        if (error) {
-          console.error('❌ Erreur session:', error);
-          setAuthState(prev => ({ ...prev, isLoading: false }));
-          return;
-        }
 
-        if (session?.user) {
-          console.log('✅ Session trouvée:', session.user.email);
-          await loadUserProfile(session.user, session);
-        } else {
-          console.log('ℹ️ Aucune session active');
-          setAuthState(prev => ({ ...prev, isLoading: false }));
-        }
-      } catch (error) {
-        console.error('❌ Erreur initialisation:', error);
-        setAuthState(prev => ({ ...prev, isLoading: false }));
+    const handleSessionChange = (event: string, session: Session | null) => {
+      console.log('🔍 Auth state change:', event, session?.user?.email);
+      const currentUserId = session?.user?.id ?? null;
+
+      // Éviter les doublons pour le même utilisateur lors de l'initialisation
+      if (currentUserId && lastHandledUserId.current === currentUserId) {
+        return;
+      }
+      lastHandledUserId.current = currentUserId;
+
+      if (session?.user) {
+        console.log('✅ Profil chargé:', session.user.email);
+        // Création synchrone de l'utilisateur
+        const user: User = {
+          id: session.user.id,
+          email: session.user.email!,
+          name: session.user.user_metadata?.name || session.user.email!.split('@')[0],
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
+
+        setAuthState({
+          user,
+          session,
+          isAuthenticated: true,
+          isLoading: false,
+        });
+      } else {
+        setAuthState({
+          user: null,
+          session: null,
+          isAuthenticated: false,
+          isLoading: false,
+        });
+        lastHandledUserId.current = null;
       }
     };
 
-    initializeAuth();
+    // 1) Configurer le listener d'abord
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      handleSessionChange(event, session);
+    });
 
-    // Écouter les changements d'authentification
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        console.log('🔍 Auth state change:', event, session?.user?.email);
-        
-        if (session?.user && !isLoadingProfile) {
-          loadUserProfile(session.user, session);
-        } else if (!session) {
-          setAuthState({
-            user: null,
-            session: null,
-            isAuthenticated: false,
-            isLoading: false,
-          });
-          setIsLoadingProfile(false);
-        }
+    // 2) Puis récupérer la session actuelle et la passer par le même handler
+    supabase.auth.getSession().then(({ data: { session }, error }) => {
+      if (error) {
+        console.error('❌ Erreur session:', error);
+        setAuthState(prev => ({ ...prev, isLoading: false }));
+        return;
       }
-    );
+      
+      if (session?.user) {
+        console.log('✅ Session trouvée:', session.user.email);
+      } else {
+        console.log('ℹ️ Aucune session active');
+      }
+      
+      handleSessionChange('INITIAL_SESSION', session);
+    });
 
     return () => {
       subscription.unsubscribe();
     };
   }, []);
 
-  // Fonction pour charger le profil utilisateur
-  const loadUserProfile = async (supabaseUser: SupabaseUser, session: Session) => {
-    if (isLoadingProfile) return; // Éviter les chargements multiples
-    
-    setIsLoadingProfile(true);
-    try {
-      console.log('🔍 Chargement profil:', supabaseUser.email);
-      
-      const user: User = {
-        id: supabaseUser.id,
-        email: supabaseUser.email!,
-        name: supabaseUser.user_metadata?.name || supabaseUser.email!.split('@')[0],
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-
-      console.log('✅ Profil chargé:', user);
-      setAuthState({
-        user,
-        session,
-        isAuthenticated: true,
-        isLoading: false,
-      });
-    } catch (error) {
-      console.error('❌ Erreur chargement profil:', error);
-      const user: User = {
-        id: supabaseUser.id,
-        email: supabaseUser.email!,
-        name: supabaseUser.user_metadata?.name || supabaseUser.email!.split('@')[0],
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-
-      setAuthState({
-        user,
-        session,
-        isAuthenticated: true,
-        isLoading: false,
-      });
-    } finally {
-      setIsLoadingProfile(false);
-    }
-  };
 
   // Fonction de connexion
   const login = async (credentials: LoginCredentials): Promise<AuthResult> => {
@@ -278,7 +250,22 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user) {
-        await loadUserProfile(session.user, session);
+        // Forcer la mise à jour en réinitialisant le ref
+        lastHandledUserId.current = null;
+        const user: User = {
+          id: session.user.id,
+          email: session.user.email!,
+          name: session.user.user_metadata?.name || session.user.email!.split('@')[0],
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
+
+        setAuthState({
+          user,
+          session,
+          isAuthenticated: true,
+          isLoading: false,
+        });
       }
     } catch (error) {
       console.error('Erreur lors du rafraîchissement du profil:', error);
