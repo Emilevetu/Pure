@@ -12,6 +12,7 @@ import Settings from "./pages/Settings";
 import SavedCharts from "./pages/SavedCharts";
 import ViewChart from "./pages/ViewChart";
 import NotFound from "./pages/NotFound";
+import { EmailConfirmationPage } from "./pages/EmailConfirmationPage";
 
 const queryClient = new QueryClient();
 
@@ -30,6 +31,7 @@ const App = () => (
             <Route path="/settings" element={<Settings />} />
             <Route path="/charts" element={<SavedCharts />} />
             <Route path="/chart/:chartId" element={<ViewChart />} />
+            <Route path="/email-confirmation" element={<EmailConfirmationPage />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

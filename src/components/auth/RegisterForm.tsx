@@ -11,6 +11,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, Eye, EyeOff } from 'lucide-react';
 import { EmailConfirmation } from './EmailConfirmation';
 import { useToast } from '@/hooks/use-toast';
+import { useNavigate } from 'react-router-dom';
 
 // Schéma de validation pour le formulaire d'inscription
 const registerSchema = z.object({
@@ -52,6 +53,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
 }) => {
   const { register: registerUser, isLoading } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -96,6 +98,9 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
             description: `Un lien de confirmation a été envoyé à ${data.email}`,
           });
         }, 1000);
+        
+        // Rediriger vers la page dédiée de confirmation
+        navigate(`/email-confirmation?email=${encodeURIComponent(data.email)}`);
       } else {
         console.log('✅ RegisterForm: Inscription réussie, redirection');
         onSuccess?.();
