@@ -11,6 +11,7 @@ import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
 import SavedCharts from "./pages/SavedCharts";
 import ViewChart from "./pages/ViewChart";
+import Friends from "./pages/Friends";
 import NotFound from "./pages/NotFound";
 import { EmailConfirmationPage } from "./pages/EmailConfirmationPage";
 
@@ -30,6 +31,7 @@ const App = () => (
             <Route path="/profile" element={<Profile />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/charts" element={<SavedCharts />} />
+            <Route path="/friends" element={<Friends />} />
             <Route path="/chart/:chartId" element={<ViewChart />} />
             <Route path="/email-confirmation" element={<EmailConfirmationPage />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
