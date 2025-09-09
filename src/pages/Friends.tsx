@@ -79,7 +79,7 @@ const Friends: React.FC = () => {
 
       console.log('🔍 [Friends] Appel des APIs...');
       const [friendsResponse, requestsReceivedResponse, requestsSentResponse] = await Promise.all([
-        friendsAPI.getFriends(),
+        friendsAPI.getUserFriends(),
         friendsAPI.getFriendRequestsReceived(),
         friendsAPI.getFriendRequestsSent()
       ]);
@@ -139,7 +139,7 @@ const Friends: React.FC = () => {
 
   const handleDeclineRequest = async (friendshipId: string) => {
     try {
-      const response = await friendsAPI.declineFriendRequest(friendshipId);
+      const response = await friendsAPI.rejectFriendRequest(friendshipId);
       if (response.success) {
         await loadFriendsData(); // Recharger les données
       } else {

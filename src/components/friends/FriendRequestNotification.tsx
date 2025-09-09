@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { friendsAPI } from '@/lib/api';
+import { friendsAPI } from '@/lib/api-simple';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { 
@@ -63,7 +63,7 @@ export const FriendRequestNotification: React.FC = () => {
 
   const handleDeclineRequest = async (friendshipId: string) => {
     try {
-      const response = await friendsAPI.declineFriendRequest(friendshipId);
+      const response = await friendsAPI.rejectFriendRequest(friendshipId);
       if (response.success) {
         await loadFriendRequests(); // Recharger la liste
       }
