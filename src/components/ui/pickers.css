@@ -1,0 +1,154 @@
+/* Styles personnalisés pour les composants de sélection */
+
+/* Animation d'entrée pour les dropdowns */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Animation de sortie */
+@keyframes slideOut {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.95);
+  }
+}
+
+/* Styles pour les composants de sélection */
+.date-picker-dropdown,
+.time-picker-dropdown {
+  animation: slideIn 0.2s ease-out;
+}
+
+/* Amélioration des boutons de navigation */
+.calendar-nav-button {
+  @apply p-2 rounded-full hover:bg-gray-100 transition-all duration-200 active:scale-95;
+}
+
+.calendar-nav-button:hover {
+  @apply bg-gray-100 shadow-sm;
+}
+
+/* Amélioration des boutons de sélection de temps */
+.time-selector-button {
+  @apply p-2 rounded-full hover:bg-gray-100 transition-all duration-200 active:scale-95;
+}
+
+.time-selector-button:hover {
+  @apply bg-gray-100 shadow-sm;
+}
+
+/* Amélioration des inputs */
+.modern-input {
+  @apply w-full px-4 py-3 text-sm border border-gray-200 rounded-xl bg-white;
+  @apply focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent;
+  @apply transition-all duration-200 placeholder:text-gray-400;
+  @apply hover:border-gray-300;
+}
+
+/* Amélioration du bouton de soumission */
+.submit-button {
+  @apply w-full bg-gradient-to-r from-blue-600 to-purple-600;
+  @apply hover:from-blue-700 hover:to-purple-700;
+  @apply text-white font-medium py-4 px-6 rounded-xl;
+  @apply transition-all duration-200;
+  @apply focus:ring-2 focus:ring-blue-500 focus:ring-offset-2;
+  @apply disabled:opacity-50 disabled:cursor-not-allowed;
+  @apply shadow-lg hover:shadow-xl;
+  @apply transform hover:-translate-y-0.5;
+}
+
+/* Amélioration des labels */
+.modern-label {
+  @apply text-sm font-medium text-gray-700;
+  @apply transition-colors duration-200;
+}
+
+/* Amélioration des placeholders */
+.modern-placeholder {
+  @apply text-gray-400;
+  @apply transition-colors duration-200;
+}
+
+/* Amélioration des icônes */
+.modern-icon {
+  @apply text-gray-400;
+  @apply transition-colors duration-200;
+}
+
+.modern-icon:hover {
+  @apply text-gray-600;
+}
+
+/* Amélioration des boutons de suppression */
+.clear-button {
+  @apply text-gray-400 hover:text-gray-600;
+  @apply transition-colors duration-200;
+  @apply active:scale-95;
+}
+
+/* Amélioration des boutons de confirmation */
+.confirm-button {
+  @apply w-full py-3 px-4 bg-blue-600 text-white rounded-xl font-medium;
+  @apply hover:bg-blue-700 transition-colors duration-200;
+  @apply active:scale-95;
+}
+
+/* Amélioration des boutons d'action */
+.action-button {
+  @apply w-full py-2 px-4 text-sm text-blue-600 hover:bg-blue-50 rounded-lg;
+  @apply transition-colors duration-200 font-medium;
+  @apply active:scale-95;
+}
+
+/* Responsive design */
+@media (max-width: 640px) {
+  .date-picker-dropdown,
+  .time-picker-dropdown {
+    @apply w-full left-0 right-0 mx-auto;
+    @apply max-w-sm;
+  }
+  
+  .time-selector {
+    @apply space-x-4;
+  }
+  
+  .time-display {
+    @apply text-2xl;
+  }
+}
+
+/* Amélioration de l'accessibilité */
+.focus-visible {
+  @apply outline-none ring-2 ring-blue-500 ring-offset-2;
+}
+
+/* Amélioration des transitions */
+.smooth-transition {
+  @apply transition-all duration-200 ease-out;
+}
+
+/* Amélioration des ombres */
+.modern-shadow {
+  @apply shadow-lg;
+  @apply hover:shadow-xl;
+  @apply transition-shadow duration-200;
+}
+
+/* Amélioration des bordures */
+.modern-border {
+  @apply border border-gray-200;
+  @apply hover:border-gray-300;
+  @apply focus:border-blue-500;
+  @apply transition-colors duration-200;
+}
