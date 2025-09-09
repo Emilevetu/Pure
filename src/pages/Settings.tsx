@@ -83,21 +83,24 @@ const Settings: React.FC = () => {
     try {
       console.log('🗑️ Suppression complète du compte utilisateur:', user.id);
       
-      // Utiliser la fonction SQL qui supprime complètement l'utilisateur
-      // y compris de auth.users
-      const { error } = await supabase.rpc('delete_user_completely', {
-        user_id: user.id
+      // Appeler l'edge function pour supprimer le compte complètement
+      const { data, error } = await supabase.functions.invoke('delete-user', {
+        body: { user_id: user.id }
       });
 
       if (error) {
-        console.error('Erreur suppression complète:', error);
-        throw new Error('Erreur lors de la suppression du compte');
+        console.error('Erreur edge function:', error);
+        throw new Error(error.message || 'Erreur lors de la suppression du compte');
       }
 
-      console.log('✅ Compte supprimé avec succès de toutes les tables');
+      if (!data?.success) {
+        throw new Error(data?.error || 'Erreur lors de la suppression du compte');
+      }
+
+      console.log('✅ Réponse function:', data.message);
       
       // Afficher le message de succès
-      setMessage({ type: 'success', text: 'Compte supprimé avec succès ! Redirection...' });
+      setMessage({ type: 'success', text: 'Compte supprimé avec succès de toutes les bases de données ! Redirection...' });
       
       // Attendre un peu pour que l'utilisateur voie le message
       setTimeout(async () => {
