@@ -1,15 +1,5 @@
 // API simplifiée pour éviter les timeouts et la complexité
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
-
-// Configuration Supabase
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Configuration Supabase manquante');
-}
-
-const supabase: SupabaseClient = createClient(supabaseUrl, supabaseAnonKey);
+import { supabase } from '@/integrations/supabase/client';
 
 // Types
 interface ApiResponse<T> {
