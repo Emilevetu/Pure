@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useRef, ReactNode } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { userAPI } from '@/lib/api';
 import type { User as SupabaseUser, Session } from '@supabase/supabase-js';
 
 // Types pour l'authentification
@@ -67,6 +68,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     isLoading: true,
   });
   const lastHandledUserId = useRef<string | null>(null);
+  const profileEnsuredForUserId = useRef<string | null>(null);
 
   // Initialisation au chargement de l'application
   useEffect(() => {
@@ -100,6 +102,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           isAuthenticated: true,
           isLoading: false,
         });
+
+        // Assurer que le profil existe dans public.users (éviter les doublons)
+        if (profileEnsuredForUserId.current !== session.user.id) {
+          profileEnsuredForUserId.current = session.user.id;
+          setTimeout(async () => {
+            try {
+              await userAPI.getProfile();
+              console.log('✅ Profil synchronisé dans public.users');
+            } catch (error) {
+              console.error('❌ Erreur synchronisation profil:', error);
+            }
+          }, 0);
+        }
       } else {
         setAuthState({
           user: null,
@@ -108,6 +123,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           isLoading: false,
         });
         lastHandledUserId.current = null;
+        profileEnsuredForUserId.current = null;
       }
     };
 
