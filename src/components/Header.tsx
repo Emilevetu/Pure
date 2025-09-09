@@ -37,7 +37,7 @@ const Header = () => {
               onClick={() => navigate('/')}
             >
               <img 
-                src="/astroguide-logo.svg" 
+                src="/placeholder.svg" 
                 alt="AstroGuide" 
                 className="h-8 w-8"
               />

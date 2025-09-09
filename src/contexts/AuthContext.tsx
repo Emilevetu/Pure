@@ -73,7 +73,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     console.log('🔍 AuthContext: Initialisation Supabase...');
 
     const handleSessionChange = (event: string, session: Session | null) => {
-      console.log('🔍 Auth state change:', event, session?.user?.email);
       const currentUserId = session?.user?.id ?? null;
 
       // Éviter les doublons pour le même utilisateur lors de l'initialisation
@@ -81,6 +80,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         return;
       }
       lastHandledUserId.current = currentUserId;
+      
+      console.log('🔍 Auth state change:', event, session?.user?.email);
 
       if (session?.user) {
         console.log('✅ Profil chargé:', session.user.email);
@@ -110,26 +111,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
     };
 
-    // 1) Configurer le listener d'abord
+    // Configurer le listener - il gérera automatiquement la session initiale
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       handleSessionChange(event, session);
-    });
-
-    // 2) Puis récupérer la session actuelle et la passer par le même handler
-    supabase.auth.getSession().then(({ data: { session }, error }) => {
-      if (error) {
-        console.error('❌ Erreur session:', error);
-        setAuthState(prev => ({ ...prev, isLoading: false }));
-        return;
-      }
-      
-      if (session?.user) {
-        console.log('✅ Session trouvée:', session.user.email);
-      } else {
-        console.log('ℹ️ Aucune session active');
-      }
-      
-      handleSessionChange('INITIAL_SESSION', session);
     });
 
     return () => {
