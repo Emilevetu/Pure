@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, Eye, EyeOff } from 'lucide-react';
 import { EmailConfirmation } from './EmailConfirmation';
+import { useToast } from '@/hooks/use-toast';
 
 // Schéma de validation pour le formulaire d'inscription
 const registerSchema = z.object({
@@ -50,6 +51,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
   onSwitchToLogin 
 }) => {
   const { register: registerUser, isLoading } = useAuth();
+  const { toast } = useToast();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -75,11 +77,25 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
     console.log('🔍 RegisterForm: Résultat de l\'inscription:', result);
     
     if (result.success) {
+      // Toast de succès pour l'inscription
+      toast({
+        title: "🎉 Inscription réussie !",
+        description: "Votre compte a été créé avec succès.",
+      });
+      
       // Vérifier si une confirmation d'email est nécessaire
       if (result.needsEmailConfirmation) {
         console.log('📧 RegisterForm: Affichage du composant de confirmation d\'email');
         setRegisteredEmail(data.email);
         setNeedsEmailConfirmation(true);
+        
+        // Toast spécifique pour la confirmation email
+        setTimeout(() => {
+          toast({
+            title: "📧 Email de confirmation envoyé",
+            description: `Un lien de confirmation a été envoyé à ${data.email}`,
+          });
+        }, 1000);
       } else {
         console.log('✅ RegisterForm: Inscription réussie, redirection');
         onSuccess?.();
@@ -87,6 +103,13 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
     } else {
       console.log('❌ RegisterForm: Erreur d\'inscription:', result.error);
       setError(result.error || 'Erreur d\'inscription');
+      
+      // Toast d'erreur
+      toast({
+        title: "❌ Erreur d'inscription",
+        description: result.error || 'Une erreur est survenue lors de l\'inscription',
+        variant: "destructive"
+      });
     }
   };
 
@@ -96,11 +119,26 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
       <EmailConfirmation 
         email={registeredEmail}
         onConfirmed={() => {
+          toast({
+            title: "✅ Email confirmé !",
+            description: "Votre compte est maintenant actif. Connexion en cours...",
+          });
           setNeedsEmailConfirmation(false);
           onSuccess?.();
         }}
         onResend={() => {
-          // Optionnel : afficher un message de succès
+          toast({
+            title: "📧 Email renvoyé",
+            description: "Un nouveau lien de confirmation a été envoyé.",
+          });
+        }}
+        onBackToForm={() => {
+          setNeedsEmailConfirmation(false);
+          setRegisteredEmail('');
+          toast({
+            title: "↩️ Retour au formulaire",
+            description: "Vous pouvez modifier vos informations si nécessaire.",
+          });
         }}
       />
     );
