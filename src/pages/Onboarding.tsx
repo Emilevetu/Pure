@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import AutocompleteDark from '../components/ui/autocomplete-dark';
+import { cities } from '../lib/cities';
+import { X } from 'lucide-react';
 
 interface OnboardingData {
   birthDate: string;
@@ -21,6 +24,7 @@ const Onboarding = () => {
     lastName: '',
     email: ''
   });
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
 
   const totalSteps = 7;
 
@@ -82,28 +86,45 @@ const Onboarding = () => {
             <h1 className="text-2xl md:text-3xl font-light text-white mb-16 leading-tight">
               Où êtes-vous <span className="text-gray-300">né(e) ?</span>
             </h1>
-            <input
-              type="text"
-              placeholder="Ville, Pays"
-              value={data.birthPlace}
-              onChange={(e) => handleInputChange('birthPlace', e.target.value)}
-              className="w-full max-w-xs mx-auto bg-transparent border-0 border-b-2 border-gray-600 rounded-none px-0 py-4 text-white text-center text-xl focus:outline-none focus:border-white transition-colors placeholder-gray-500"
-            />
+            <div className="w-full max-w-xs mx-auto">
+              <AutocompleteDark
+                value={data.birthPlace}
+                onChange={(value) => handleInputChange('birthPlace', value)}
+                placeholder="Rechercher une ville..."
+                options={cities}
+                className="w-full"
+              />
+            </div>
           </div>
         );
 
       case 3:
         return (
           <div className="text-left px-6">
-            <h1 className="text-2xl md:text-3xl font-light text-white mb-16 leading-tight">
+            <h1 className="text-2xl md:text-3xl font-light text-white mb-8 leading-tight">
               À quelle heure <span className="text-gray-300">êtes-vous né(e) ?</span>
             </h1>
+            <p className="text-gray-400 text-sm mb-8 leading-relaxed">
+              Il est important que l'horaire soit précis.
+            </p>
             <input
               type="time"
               value={data.birthTime}
               onChange={(e) => handleInputChange('birthTime', e.target.value)}
               className="w-full max-w-xs mx-auto bg-transparent border-0 border-b-2 border-gray-600 rounded-none px-0 py-4 text-white text-center text-xl focus:outline-none focus:border-white transition-colors"
             />
+            <div className="mt-6">
+              <button
+                onClick={() => setIsPopupOpen(true)}
+                className="w-full max-w-xs mx-auto py-3 px-4 rounded-lg text-sm font-medium transition-colors border border-gray-600 text-gray-300 hover:bg-gray-800 hover:border-gray-500 hover:text-white focus:outline-none focus:text-gray-300 focus:border-gray-600"
+              >
+                {data.birthTime === 'night' && 'La nuit - entre minuit et 8h'}
+                {data.birthTime === 'day' && 'La journée - entre 8h et 16h'}
+                {data.birthTime === 'evening' && 'La soirée - entre 16h et minuit'}
+                {data.birthTime === 'unknown' && 'Je ne sais pas'}
+                {!data.birthTime && 'Je ne connais pas l\'heure exacte'}
+              </button>
+            </div>
           </div>
         );
 
@@ -111,15 +132,64 @@ const Onboarding = () => {
         return (
           <div className="text-left px-6">
             <h1 className="text-2xl md:text-3xl font-light text-white mb-16 leading-tight">
-              Quel est votre <span className="text-gray-300">prénom ?</span>
+              À quel moment de la journée <span className="text-gray-300">vous sentez-vous le plus en forme ?</span>
             </h1>
-            <input
-              type="text"
-              placeholder="Votre prénom"
-              value={data.firstName}
-              onChange={(e) => handleInputChange('firstName', e.target.value)}
-              className="w-full max-w-xs mx-auto bg-transparent border-0 border-b-2 border-gray-600 rounded-none px-0 py-4 text-white text-center text-xl focus:outline-none focus:border-white transition-colors placeholder-gray-500"
-            />
+            <div className="space-y-3">
+              <button
+                onClick={() => handleInputChange('firstName', 'morning')}
+                className={`w-full max-w-xs mx-auto py-3 px-4 rounded-lg text-sm font-medium transition-colors border ${
+                  data.firstName === 'morning' 
+                    ? 'border-white text-white bg-white/10' 
+                    : 'border-gray-600 text-gray-300 hover:bg-gray-800 hover:border-gray-500 hover:text-white'
+                } focus:outline-none`}
+              >
+                Tôt le matin
+              </button>
+              
+              <button
+                onClick={() => handleInputChange('firstName', 'late-morning')}
+                className={`w-full max-w-xs mx-auto py-3 px-4 rounded-lg text-sm font-medium transition-colors border ${
+                  data.firstName === 'late-morning' 
+                    ? 'border-white text-white bg-white/10' 
+                    : 'border-gray-600 text-gray-300 hover:bg-gray-800 hover:border-gray-500 hover:text-white'
+                } focus:outline-none`}
+              >
+                En fin de matinée
+              </button>
+              
+              <button
+                onClick={() => handleInputChange('firstName', 'afternoon')}
+                className={`w-full max-w-xs mx-auto py-3 px-4 rounded-lg text-sm font-medium transition-colors border ${
+                  data.firstName === 'afternoon' 
+                    ? 'border-white text-white bg-white/10' 
+                    : 'border-gray-600 text-gray-300 hover:bg-gray-800 hover:border-gray-500 hover:text-white'
+                } focus:outline-none`}
+              >
+                Pendant l'après-midi
+              </button>
+              
+              <button
+                onClick={() => handleInputChange('firstName', 'evening')}
+                className={`w-full max-w-xs mx-auto py-3 px-4 rounded-lg text-sm font-medium transition-colors border ${
+                  data.firstName === 'evening' 
+                    ? 'border-white text-white bg-white/10' 
+                    : 'border-gray-600 text-gray-300 hover:bg-gray-800 hover:border-gray-500 hover:text-white'
+                } focus:outline-none`}
+              >
+                Le soir
+              </button>
+              
+              <button
+                onClick={() => handleInputChange('firstName', 'night')}
+                className={`w-full max-w-xs mx-auto py-3 px-4 rounded-lg text-sm font-medium transition-colors border ${
+                  data.firstName === 'night' 
+                    ? 'border-white text-white bg-white/10' 
+                    : 'border-gray-600 text-gray-300 hover:bg-gray-800 hover:border-gray-500 hover:text-white'
+                } focus:outline-none`}
+              >
+                La nuit
+              </button>
+            </div>
           </div>
         );
 
@@ -227,6 +297,67 @@ const Onboarding = () => {
           {currentStep === totalSteps ? 'Terminer' : 'Suivant'}
         </button>
       </div>
+
+      {/* Pop-up pour "Je ne connais pas l'heure exacte" */}
+      {isPopupOpen && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-gray-900 rounded-2xl p-6 max-w-sm w-full border border-gray-700">
+            {/* Header avec bouton fermer */}
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-white text-lg font-medium">Je pense être né(e) pendant</h3>
+              <button
+                onClick={() => setIsPopupOpen(false)}
+                className="text-gray-400 hover:text-white transition-colors p-1"
+              >
+                <X size={20} />
+              </button>
+            </div>
+            
+            {/* Boutons de créneaux horaires */}
+            <div className="space-y-3">
+              <button
+                onClick={() => {
+                  handleInputChange('birthTime', 'night');
+                  setIsPopupOpen(false);
+                }}
+                className="w-full py-3 px-4 border border-gray-600 text-gray-300 rounded-lg text-sm font-medium hover:bg-gray-800 hover:border-gray-500 hover:text-white transition-colors"
+              >
+                La nuit - entre minuit et 8h
+              </button>
+              
+              <button
+                onClick={() => {
+                  handleInputChange('birthTime', 'day');
+                  setIsPopupOpen(false);
+                }}
+                className="w-full py-3 px-4 border border-gray-600 text-gray-300 rounded-lg text-sm font-medium hover:bg-gray-800 hover:border-gray-500 hover:text-white transition-colors"
+              >
+                La journée - entre 8h et 16h
+              </button>
+              
+              <button
+                onClick={() => {
+                  handleInputChange('birthTime', 'evening');
+                  setIsPopupOpen(false);
+                }}
+                className="w-full py-3 px-4 border border-gray-600 text-gray-300 rounded-lg text-sm font-medium hover:bg-gray-800 hover:border-gray-500 hover:text-white transition-colors"
+              >
+                La soirée - entre 16h et minuit
+              </button>
+              
+              <button
+                onClick={() => {
+                  handleInputChange('birthTime', 'unknown');
+                  setIsPopupOpen(false);
+                }}
+                className="w-full py-3 px-4 border border-gray-600 text-gray-300 rounded-lg text-sm font-medium hover:bg-gray-800 hover:border-gray-500 hover:text-white transition-colors"
+              >
+                Je ne sais pas
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
