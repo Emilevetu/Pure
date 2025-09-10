@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import BirthForm from '../components/BirthForm';
 import ResultCard from '../components/ResultCard';
@@ -30,6 +31,7 @@ interface AstroData {
 }
 
 const Index = () => {
+  const navigate = useNavigate();
   const [birthData, setBirthData] = useState<BirthData | null>(null);
   const [astroData, setAstroData] = useState<AstroData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -143,16 +145,20 @@ const Index = () => {
           <div className="container mx-auto">
             <div className="max-w-4xl mx-auto text-center">
               {/* Main title */}
-              <h1 className="text-4xl lg:text-6xl font-light tracking-tight mb-6">
-                Visualise l'alignement des planètes{' '}
-                <span className="text-muted-foreground">à ta naissance</span>
+              <h1 className="text-3xl lg:text-4xl font-light tracking-tight mb-6">
+                Chaque humain est unique.{' '}
+                <span className="text-muted-foreground">Pure vous aide à vous connaître et à connaitre vos proches.</span>
               </h1>
               
-              {/* Subtitle */}
-              <p className="text-xl text-muted-foreground mb-12 max-w-2xl mx-auto leading-relaxed">
-                Découvrez la position exacte des astres au moment précis 
-                de votre venue au monde grâce aux données précises de la NASA (JPL Horizons).
-              </p>
+              {/* Onboarding Button */}
+              <div className="mb-12">
+                <button 
+                  className="bg-black text-white px-8 py-4 rounded-lg text-lg font-medium hover:bg-gray-800 transition-colors"
+                  onClick={() => navigate('/onboarding')}
+                >
+                  Commencer mon onboarding
+                </button>
+              </div>
               
               {/* Birth Form */}
               <div className="mb-16">

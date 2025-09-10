@@ -12,6 +12,7 @@ import Settings from "./pages/Settings";
 import SavedCharts from "./pages/SavedCharts";
 import ViewChart from "./pages/ViewChart";
 import Friends from "./pages/Friends";
+import Onboarding from "./pages/Onboarding";
 import NotFound from "./pages/NotFound";
 import { EmailConfirmationPage } from "./pages/EmailConfirmationPage";
 
@@ -26,6 +27,7 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />
+            <Route path="/onboarding" element={<Onboarding />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/profile" element={<Profile />} />
