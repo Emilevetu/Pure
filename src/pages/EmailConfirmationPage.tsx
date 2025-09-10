@@ -16,7 +16,7 @@ export const EmailConfirmationPage: React.FC = () => {
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">AstroGuide</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Pure</h1>
           <p className="text-gray-600">Votre guide personnel vers les étoiles</p>
         </div>
 
@@ -29,7 +29,7 @@ export const EmailConfirmationPage: React.FC = () => {
               🎉 Compte créé avec succès !
             </CardTitle>
             <CardDescription className="text-lg text-gray-600 mt-2">
-              Votre compte AstroGuide a été créé. Il ne reste plus qu'une étape...
+              Votre compte Pure a été créé. Il ne reste plus qu'une étape...
             </CardDescription>
           </CardHeader>
           
@@ -100,7 +100,7 @@ export const EmailConfirmationPage: React.FC = () => {
 
             <div className="text-center text-xs text-gray-500">
               <p>
-                Une fois votre email confirmé, vous pourrez accéder à toutes les fonctionnalités d'AstroGuide !
+                Une fois votre email confirmé, vous pourrez accéder à toutes les fonctionnalités de Pure !
               </p>
             </div>
           </CardContent>

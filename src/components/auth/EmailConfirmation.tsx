@@ -209,7 +209,7 @@ export const EmailConfirmation: React.FC<EmailConfirmationProps> = ({
                     <li>• Vérifiez votre dossier <strong>spam/courrier indésirable</strong></li>
                     <li>• L'email peut prendre jusqu'à <strong>5 minutes</strong> à arriver</li>
                     <li>• Assurez-vous que l'adresse email est correcte</li>
-                    <li>• Ajoutez <strong>noreply@astroguide.com</strong> à vos contacts</li>
+                    <li>• Ajoutez <strong>noreply@pure.com</strong> à vos contacts</li>
                   </ul>
                 </div>
               </div>

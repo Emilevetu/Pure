@@ -247,17 +247,6 @@ const PlanetBannerContent = () => {
       
       <SolarSystemViewer />
       
-      {/* Overlay content */}
-      <div className="absolute top-8 left-1/2 transform -translate-x-1/2 z-10 pointer-events-none">
-        <div className="text-center backdrop-blur-sm bg-cosmic-dark/30 rounded-2xl p-6 border border-cosmic-text/10">
-          <h2 className="text-2xl lg:text-3xl font-light text-cosmic-text mb-2 drop-shadow-lg">
-            L'alignement des planètes
-          </h2>
-          <p className="text-cosmic-text/90 text-base max-w-xl drop-shadow-md">
-            Découvrez la position des astres au moment de votre naissance
-          </p>
-        </div>
-      </div>
     </div>
   );
 };
@@ -269,9 +258,6 @@ const Fallback = () => (
       <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-cosmic-text/10 flex items-center justify-center">
         <div className="w-12 h-12 rounded-full bg-cosmic-text/20" />
       </div>
-      <h2 className="text-3xl lg:text-4xl font-light text-cosmic-text mb-4">
-        L'alignement des planètes
-      </h2>
       <p className="text-cosmic-text/80 text-lg max-w-2xl">
         Aperçu visuel indisponible
       </p>

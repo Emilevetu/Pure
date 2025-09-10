@@ -192,7 +192,7 @@ export const apiClient = new ApiClient();
 
 // Configuration automatique du token d'authentification
 if (typeof window !== 'undefined') {
-  const token = localStorage.getItem('astroguide_token');
+  const token = localStorage.getItem('pure_token');
   if (token) {
     apiClient.setAuthToken(token);
   }

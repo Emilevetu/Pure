@@ -63,7 +63,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
       <CardHeader className="text-center">
         <CardTitle className="text-2xl font-bold">Connexion</CardTitle>
         <CardDescription>
-          Connectez-vous à votre compte AstroGuide
+          Connectez-vous à votre compte Pure
         </CardDescription>
       </CardHeader>
       

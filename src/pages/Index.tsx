@@ -1,8 +1,7 @@
-import React, { useState, Suspense, lazy } from 'react';
+import React, { useState } from 'react';
 import Header from '../components/Header';
 import BirthForm from '../components/BirthForm';
 import ResultCard from '../components/ResultCard';
-import MethodSection from '../components/MethodSection';
 import Footer from '../components/Footer';
 import TableauPlanetes from '../components/TableauPlanetes';
 import AIAstrologyAnalysis from '../components/AIAstrologyAnalysis';
@@ -10,8 +9,6 @@ import { SaveChartButton } from '../components/SaveChartButton';
 import { PlanetaryPosition } from '../lib/jpl-horizons';
 import { GeocodingService } from '../lib/geocoding';
 
-// Lazy load the 3D component for better performance
-const PlanetBanner = lazy(() => import('../components/PlanetBanner'));
 
 interface BirthData {
   date: string;
@@ -165,14 +162,6 @@ const Index = () => {
           </div>
         </section>
         
-        {/* 3D Planet Banner */}
-        <Suspense fallback={
-          <div className="w-full h-[400px] lg:h-[500px] bg-gradient-cosmic flex items-center justify-center">
-            <div className="text-cosmic-text">Chargement de la scène 3D...</div>
-          </div>
-        }>
-          <PlanetBanner />
-        </Suspense>
         
         {/* Results Section */}
         {showResults && birthData && astroData && (
@@ -217,8 +206,6 @@ const Index = () => {
           </section>
         )}
         
-        {/* Method Section */}
-        <MethodSection />
       </main>
       
       <Footer />

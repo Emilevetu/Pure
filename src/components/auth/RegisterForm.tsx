@@ -154,7 +154,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
       <CardHeader className="text-center">
         <CardTitle className="text-2xl font-bold">Inscription</CardTitle>
         <CardDescription>
-          Créez votre compte AstroGuide pour sauvegarder vos thèmes astraux
+          Créez votre compte Pure pour sauvegarder vos thèmes astraux
         </CardDescription>
       </CardHeader>
       

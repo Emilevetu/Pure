@@ -38,10 +38,10 @@ const Header = () => {
             >
               <img 
                 src="/placeholder.svg" 
-                alt="AstroGuide" 
+                alt="Pure" 
                 className="h-8 w-8"
               />
-              <span className="text-xl font-semibold tracking-tight">AstroGuide</span>
+              <span className="text-xl font-semibold tracking-tight">Pure</span>
             </div>
 
             {/* Desktop Navigation */}

@@ -12,7 +12,7 @@ const MethodSection = () => {
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div className="text-left space-y-6">
               <p className="text-cosmic-text/90 leading-relaxed">
-                AstroGuide propose une approche <strong>pédagogique et scientifique</strong> 
+                Pure propose une approche <strong>pédagogique et scientifique</strong> 
                 de l'astronomie positionnelle. Nous nous concentrons sur les données 
                 factuelles et observables.
               </p>

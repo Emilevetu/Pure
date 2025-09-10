@@ -208,7 +208,7 @@ const Settings: React.FC = () => {
                     <span>Informations du compte</span>
                   </CardTitle>
                   <CardDescription>
-                    Détails de votre compte AstroGuide
+                    Détails de votre compte Pure
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">

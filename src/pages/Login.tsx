@@ -43,7 +43,7 @@ const Login: React.FC = () => {
 
           {/* Logo et titre */}
           <div className="text-center space-y-2">
-            <h1 className="text-3xl font-bold">AstroGuide</h1>
+            <h1 className="text-3xl font-bold">Pure</h1>
             <p className="text-muted-foreground">
               Connectez-vous pour accéder à vos thèmes astraux
             </p>

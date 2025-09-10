@@ -40,7 +40,7 @@ const Register: React.FC = () => {
 
           {/* Logo et titre */}
           <div className="text-center space-y-2">
-            <h1 className="text-3xl font-bold">AstroGuide</h1>
+            <h1 className="text-3xl font-bold">Pure</h1>
             <p className="text-muted-foreground">
               Créez votre compte pour sauvegarder vos thèmes astraux
             </p>
