@@ -63,10 +63,9 @@ const Onboarding = () => {
     switch (currentStep) {
       case 1:
         return (
-          <div className="text-center px-6">
-            <h1 className="text-4xl md:text-5xl font-light text-white mb-16 leading-tight">
-              Quelle est votre<br />
-              <span className="text-gray-300">date de naissance ?</span>
+          <div className="text-left px-6">
+            <h1 className="text-2xl md:text-3xl font-light text-white mb-16 leading-tight">
+              Quelle est votre <span className="text-gray-300">date de naissance ?</span>
             </h1>
             <input
               type="date"
@@ -79,10 +78,9 @@ const Onboarding = () => {
 
       case 2:
         return (
-          <div className="text-center px-6">
-            <h1 className="text-4xl md:text-5xl font-light text-white mb-16 leading-tight">
-              Où êtes-vous<br />
-              <span className="text-gray-300">né(e) ?</span>
+          <div className="text-left px-6">
+            <h1 className="text-2xl md:text-3xl font-light text-white mb-16 leading-tight">
+              Où êtes-vous <span className="text-gray-300">né(e) ?</span>
             </h1>
             <input
               type="text"
@@ -96,10 +94,9 @@ const Onboarding = () => {
 
       case 3:
         return (
-          <div className="text-center px-6">
-            <h1 className="text-4xl md:text-5xl font-light text-white mb-16 leading-tight">
-              À quelle heure<br />
-              <span className="text-gray-300">êtes-vous né(e) ?</span>
+          <div className="text-left px-6">
+            <h1 className="text-2xl md:text-3xl font-light text-white mb-16 leading-tight">
+              À quelle heure <span className="text-gray-300">êtes-vous né(e) ?</span>
             </h1>
             <input
               type="time"
@@ -112,10 +109,9 @@ const Onboarding = () => {
 
       case 4:
         return (
-          <div className="text-center px-6">
-            <h1 className="text-4xl md:text-5xl font-light text-white mb-16 leading-tight">
-              Quel est votre<br />
-              <span className="text-gray-300">prénom ?</span>
+          <div className="text-left px-6">
+            <h1 className="text-2xl md:text-3xl font-light text-white mb-16 leading-tight">
+              Quel est votre <span className="text-gray-300">prénom ?</span>
             </h1>
             <input
               type="text"
@@ -129,10 +125,9 @@ const Onboarding = () => {
 
       case 5:
         return (
-          <div className="text-center px-6">
-            <h1 className="text-4xl md:text-5xl font-light text-white mb-16 leading-tight">
-              Quel est votre<br />
-              <span className="text-gray-300">nom de famille ?</span>
+          <div className="text-left px-6">
+            <h1 className="text-2xl md:text-3xl font-light text-white mb-16 leading-tight">
+              Quel est votre <span className="text-gray-300">nom de famille ?</span>
             </h1>
             <input
               type="text"
@@ -146,10 +141,9 @@ const Onboarding = () => {
 
       case 6:
         return (
-          <div className="text-center px-6">
-            <h1 className="text-4xl md:text-5xl font-light text-white mb-16 leading-tight">
-              Quelle est votre<br />
-              <span className="text-gray-300">adresse email ?</span>
+          <div className="text-left px-6">
+            <h1 className="text-2xl md:text-3xl font-light text-white mb-16 leading-tight">
+              Quelle est votre <span className="text-gray-300">adresse email ?</span>
             </h1>
             <input
               type="email"
@@ -163,10 +157,9 @@ const Onboarding = () => {
 
       case 7:
         return (
-          <div className="text-center px-6">
-            <h1 className="text-4xl md:text-5xl font-light text-white mb-16 leading-tight">
-              Parfait ! Votre<br />
-              <span className="text-gray-300">profil est créé</span>
+          <div className="text-left px-6">
+            <h1 className="text-2xl md:text-3xl font-light text-white mb-16 leading-tight">
+              Parfait ! Votre <span className="text-gray-300">profil est créé</span>
             </h1>
             <div className="bg-gray-900/50 rounded-2xl p-8 max-w-sm mx-auto backdrop-blur-sm">
               <p className="text-gray-300 mb-3 text-lg"><strong className="text-white">Nom:</strong> {data.firstName} {data.lastName}</p>
@@ -213,7 +206,7 @@ const Onboarding = () => {
 
       {/* Contenu principal */}
       <main className="pt-20">
-        <div className="min-h-screen flex items-center justify-center px-6">
+        <div className="min-h-screen flex items-start justify-center px-6 pt-2">
           <div className="w-full max-w-lg">
             {renderStep()}
           </div>
