@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AutocompleteDark from '../components/ui/autocomplete-dark';
 import { cities } from '../lib/cities';
@@ -27,6 +27,27 @@ const Onboarding = () => {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
 
   const totalSteps = 7;
+
+  // Empêcher le scroll sur la page
+  useEffect(() => {
+    // Sauvegarder la position de scroll actuelle
+    const scrollY = window.scrollY;
+    
+    // Empêcher le scroll
+    document.body.style.overflow = 'hidden';
+    document.body.style.position = 'fixed';
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.width = '100%';
+    
+    // Nettoyer au démontage du composant
+    return () => {
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.width = '';
+      window.scrollTo(0, scrollY);
+    };
+  }, []);
 
   const handleNext = () => {
     if (currentStep < totalSteps) {
@@ -134,13 +155,13 @@ const Onboarding = () => {
             <h1 className="text-2xl md:text-3xl font-light text-white mb-16 leading-tight">
               À quel moment de la journée <span className="text-gray-300">vous sentez-vous le plus en forme ?</span>
             </h1>
-            <div className="space-y-3">
+            <div className="space-y-2">
               <button
                 onClick={() => handleInputChange('firstName', 'morning')}
-                className={`w-full max-w-xs mx-auto py-3 px-4 rounded-lg text-sm font-medium transition-colors border ${
+                className={`w-full max-w-xs mx-auto py-2 px-4 rounded-lg text-sm font-light transition-all duration-200 border ${
                   data.firstName === 'morning' 
                     ? 'border-white text-white bg-white/10' 
-                    : 'border-gray-600 text-gray-300 hover:bg-gray-800 hover:border-gray-500 hover:text-white'
+                    : 'border-gray-600 text-gray-300 hover:bg-gray-800/50 hover:border-gray-500 hover:text-white'
                 } focus:outline-none`}
               >
                 Tôt le matin
@@ -148,10 +169,10 @@ const Onboarding = () => {
               
               <button
                 onClick={() => handleInputChange('firstName', 'late-morning')}
-                className={`w-full max-w-xs mx-auto py-3 px-4 rounded-lg text-sm font-medium transition-colors border ${
+                className={`w-full max-w-xs mx-auto py-2 px-4 rounded-lg text-sm font-light transition-all duration-200 border ${
                   data.firstName === 'late-morning' 
                     ? 'border-white text-white bg-white/10' 
-                    : 'border-gray-600 text-gray-300 hover:bg-gray-800 hover:border-gray-500 hover:text-white'
+                    : 'border-gray-600 text-gray-300 hover:bg-gray-800/50 hover:border-gray-500 hover:text-white'
                 } focus:outline-none`}
               >
                 En fin de matinée
@@ -159,10 +180,10 @@ const Onboarding = () => {
               
               <button
                 onClick={() => handleInputChange('firstName', 'afternoon')}
-                className={`w-full max-w-xs mx-auto py-3 px-4 rounded-lg text-sm font-medium transition-colors border ${
+                className={`w-full max-w-xs mx-auto py-2 px-4 rounded-lg text-sm font-light transition-all duration-200 border ${
                   data.firstName === 'afternoon' 
                     ? 'border-white text-white bg-white/10' 
-                    : 'border-gray-600 text-gray-300 hover:bg-gray-800 hover:border-gray-500 hover:text-white'
+                    : 'border-gray-600 text-gray-300 hover:bg-gray-800/50 hover:border-gray-500 hover:text-white'
                 } focus:outline-none`}
               >
                 Pendant l'après-midi
@@ -170,10 +191,10 @@ const Onboarding = () => {
               
               <button
                 onClick={() => handleInputChange('firstName', 'evening')}
-                className={`w-full max-w-xs mx-auto py-3 px-4 rounded-lg text-sm font-medium transition-colors border ${
+                className={`w-full max-w-xs mx-auto py-2 px-4 rounded-lg text-sm font-light transition-all duration-200 border ${
                   data.firstName === 'evening' 
                     ? 'border-white text-white bg-white/10' 
-                    : 'border-gray-600 text-gray-300 hover:bg-gray-800 hover:border-gray-500 hover:text-white'
+                    : 'border-gray-600 text-gray-300 hover:bg-gray-800/50 hover:border-gray-500 hover:text-white'
                 } focus:outline-none`}
               >
                 Le soir
@@ -181,10 +202,10 @@ const Onboarding = () => {
               
               <button
                 onClick={() => handleInputChange('firstName', 'night')}
-                className={`w-full max-w-xs mx-auto py-3 px-4 rounded-lg text-sm font-medium transition-colors border ${
+                className={`w-full max-w-xs mx-auto py-2 px-4 rounded-lg text-sm font-light transition-all duration-200 border ${
                   data.firstName === 'night' 
                     ? 'border-white text-white bg-white/10' 
-                    : 'border-gray-600 text-gray-300 hover:bg-gray-800 hover:border-gray-500 hover:text-white'
+                    : 'border-gray-600 text-gray-300 hover:bg-gray-800/50 hover:border-gray-500 hover:text-white'
                 } focus:outline-none`}
               >
                 La nuit
@@ -247,7 +268,7 @@ const Onboarding = () => {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen bg-black text-white overflow-hidden">
       {/* Header avec indicateur de progression */}
       <div className="fixed top-0 left-0 right-0 z-50 bg-black">
         <div className="flex items-center justify-between px-6 py-4">
@@ -258,17 +279,17 @@ const Onboarding = () => {
             ←
           </button>
           
-          {/* Indicateur de progression */}
-          <div className="flex space-x-2">
-            {Array.from({ length: totalSteps }, (_, index) => (
-              <div
-                key={index}
-                className={`w-2 h-2 rounded-full transition-colors ${
-                  index + 1 <= currentStep ? 'bg-white' : 'bg-gray-600'
-                }`}
-              />
-            ))}
-          </div>
+                {/* Indicateur de progression */}
+                <div className="flex space-x-1.5">
+                  {Array.from({ length: totalSteps }, (_, index) => (
+                    <div
+                      key={index}
+                      className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
+                        index + 1 <= currentStep ? 'bg-white' : 'bg-gray-500'
+                      }`}
+                    />
+                  ))}
+                </div>
           
           <div className="w-6" /> {/* Spacer pour centrer */}
         </div>
@@ -284,7 +305,7 @@ const Onboarding = () => {
       </main>
 
       {/* Bouton Suivant */}
-      <div className="fixed bottom-0 left-0 right-0 bg-black border-t border-gray-800 p-6">
+      <div className="fixed bottom-0 left-0 right-0 bg-black p-6">
         <button
           onClick={handleNext}
           disabled={!isStepValid()}

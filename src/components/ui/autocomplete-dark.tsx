@@ -126,7 +126,7 @@ const AutocompleteDark: React.FC<AutocompleteDarkProps> = ({
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
           className={cn(
-            "w-full bg-transparent border-0 border-b-2 border-gray-600 rounded-none px-0 py-4 text-white text-center text-xl focus:outline-none focus:border-white transition-colors placeholder-gray-500",
+            "w-full bg-transparent border-0 border-b-2 border-gray-600 rounded-none pl-8 pr-12 py-4 text-white text-left text-xl focus:outline-none focus:border-white transition-colors placeholder-gray-500",
             "disabled:bg-gray-50 disabled:text-gray-500",
             className
           )}
