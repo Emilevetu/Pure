@@ -9,23 +9,29 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 import { 
-  User, 
-  Mail, 
-  Calendar, 
-  Star, 
-  Settings,
-  Edit
+  Star,
+  Calendar,
+  MapPin,
+  Clock,
+  Zap,
+  Heart,
+  Users,
+  Target
 } from 'lucide-react';
+import { ProfileService, UserProfile } from '../lib/profile-service';
 
 const Profile: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useUser();
   const [chartsCount, setChartsCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [profileLoading, setProfileLoading] = useState(true);
 
   useEffect(() => {
     if (user) {
       loadChartsCount();
+      loadUserProfile();
     }
   }, [user]);
 
@@ -42,6 +48,21 @@ const Profile: React.FC = () => {
     }
   };
 
+  const loadUserProfile = async () => {
+    if (!user?.id) return;
+    
+    try {
+      console.log('📖 [Profile] Chargement du profil utilisateur...');
+      const profile = await ProfileService.getUserProfile(user.id);
+      setUserProfile(profile);
+      console.log('✅ [Profile] Profil chargé:', profile);
+    } catch (error) {
+      console.error('❌ [Profile] Erreur lors du chargement du profil:', error);
+    } finally {
+      setProfileLoading(false);
+    }
+  };
+
   if (!user) {
     return null;
   }
@@ -53,14 +74,6 @@ const Profile: React.FC = () => {
       .join('')
       .toUpperCase()
       .slice(0, 2);
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('fr-FR', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
   };
 
   return (
@@ -84,71 +97,120 @@ const Profile: React.FC = () => {
               </div>
             </div>
 
-            <div className="grid gap-6 md:grid-cols-2">
-              {/* Informations personnelles */}
+            {/* Données d'onboarding */}
+            {userProfile && (
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center space-x-2">
-                    <User className="h-5 w-5" />
-                    <span>Informations personnelles</span>
+                    <Calendar className="h-5 w-5" />
+                    <span>Mon profil</span>
                   </CardTitle>
                   <CardDescription>
-                    Vos informations de profil
+                    Vos informations personnelles
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="flex items-center space-x-3">
-                    <Mail className="h-4 w-4 text-muted-foreground" />
-                    <div>
-                      <p className="text-sm font-medium">Email</p>
-                      <p className="text-sm text-muted-foreground">{user.email}</p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="flex items-center space-x-3 p-3 bg-muted/30 rounded-lg">
+                      <Calendar className="h-5 w-5 text-muted-foreground" />
+                      <div>
+                        <p className="text-sm text-muted-foreground">Né(e) le</p>
+                        <p className="font-medium">{userProfile.birth_date}</p>
+                      </div>
                     </div>
-                  </div>
-                  
-                  <Separator />
-                  
-                  <div className="flex items-center space-x-3">
-                    <Calendar className="h-4 w-4 text-muted-foreground" />
-                    <div>
-                      <p className="text-sm font-medium">Membre depuis</p>
-                      <p className="text-sm text-muted-foreground">
-                        {formatDate(user.createdAt)}
-                      </p>
+                    
+                    <div className="flex items-center space-x-3 p-3 bg-muted/30 rounded-lg">
+                      <MapPin className="h-5 w-5 text-muted-foreground" />
+                      <div>
+                        <p className="text-sm text-muted-foreground">Lieu de naissance</p>
+                        <p className="font-medium">{userProfile.birth_place}</p>
+                      </div>
                     </div>
-                  </div>
-                  
-                  <div className="pt-4">
-                    <Button variant="outline" size="sm" className="w-full">
-                      <Edit className="mr-2 h-4 w-4" />
-                      Modifier le profil
-                    </Button>
+                    
+                    <div className="flex items-center space-x-3 p-3 bg-muted/30 rounded-lg">
+                      <Clock className="h-5 w-5 text-muted-foreground" />
+                      <div>
+                        <p className="text-sm text-muted-foreground">Heure de naissance</p>
+                        <p className="font-medium">{userProfile.birth_time}</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center space-x-3 p-3 bg-muted/30 rounded-lg">
+                      <Zap className="h-5 w-5 text-muted-foreground" />
+                      <div>
+                        <p className="text-sm text-muted-foreground">Énergie</p>
+                        <p className="font-medium">{userProfile.energy_time}</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center space-x-3 p-3 bg-muted/30 rounded-lg">
+                      <Heart className="h-5 w-5 text-muted-foreground" />
+                      <div>
+                        <p className="text-sm text-muted-foreground">Ressource</p>
+                        <p className="font-medium">{userProfile.resource}</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center space-x-3 p-3 bg-muted/30 rounded-lg">
+                      <Users className="h-5 w-5 text-muted-foreground" />
+                      <div>
+                        <p className="text-sm text-muted-foreground">Rôle en groupe</p>
+                        <p className="font-medium">{userProfile.group_role}</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center space-x-3 p-3 bg-muted/30 rounded-lg col-span-1 md:col-span-2">
+                      <Target className="h-5 w-5 text-muted-foreground" />
+                      <div>
+                        <p className="text-sm text-muted-foreground">Priorité</p>
+                        <p className="font-medium">{userProfile.priority}</p>
+                      </div>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
+            )}
 
-              {/* Statistiques */}
+            {/* Thème astral */}
+            {userProfile?.astro_data && (
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center space-x-2">
                     <Star className="h-5 w-5" />
-                    <span>Mes thèmes astraux</span>
+                    <span>Mon thème astral</span>
                   </CardTitle>
                   <CardDescription>
-                    Vos analyses sauvegardées
+                    Vos positions planétaires principales
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="text-center p-4 bg-muted/50 rounded-lg">
-                      <p className="text-2xl font-bold text-primary">
-                        {isLoading ? '...' : chartsCount}
-                      </p>
-                      <p className="text-sm text-muted-foreground">Thèmes sauvegardés</p>
+                  {/* Ascendant et MC */}
+                  {userProfile.astro_data.houseSystem && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                      <div className="text-center p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg border border-blue-200">
+                        <p className="text-sm text-blue-600 font-medium mb-1">Ascendant</p>
+                        <p className="text-lg font-bold text-blue-800">
+                          {userProfile.astro_data.houseSystem.ascendant.sign} {userProfile.astro_data.houseSystem.ascendant.degrees}°{userProfile.astro_data.houseSystem.ascendant.minutes}'
+                        </p>
+                      </div>
+                      <div className="text-center p-4 bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg border border-purple-200">
+                        <p className="text-sm text-purple-600 font-medium mb-1">Milieu du Ciel</p>
+                        <p className="text-lg font-bold text-purple-800">
+                          {userProfile.astro_data.houseSystem.mc.sign} {userProfile.astro_data.houseSystem.mc.degrees}°{userProfile.astro_data.houseSystem.mc.minutes}'
+                        </p>
+                      </div>
                     </div>
-                    <div className="text-center p-4 bg-muted/50 rounded-lg">
-                      <p className="text-2xl font-bold text-primary">0</p>
-                      <p className="text-sm text-muted-foreground">Analyses partagées</p>
-                    </div>
+                  )}
+
+                  {/* Planètes principales */}
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                    {userProfile.astro_data.planets?.slice(0, 6).map((planet) => (
+                      <div key={planet.planetId} className="text-center p-3 bg-muted/30 rounded-lg">
+                        <p className="text-xs text-muted-foreground mb-1">{planet.planet}</p>
+                        <p className="text-sm font-medium">{planet.sign}</p>
+                        <p className="text-xs text-muted-foreground">{planet.house}</p>
+                      </div>
+                    ))}
                   </div>
                   
                   <div className="pt-4">
@@ -159,33 +221,47 @@ const Profile: React.FC = () => {
                       onClick={() => navigate('/charts')}
                     >
                       <Star className="mr-2 h-4 w-4" />
-                      Voir mes thèmes
+                      Voir le thème complet
                     </Button>
                   </div>
                 </CardContent>
               </Card>
-            </div>
+            )}
 
-            {/* Paramètres */}
+            {/* Statistiques */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
-                  <Settings className="h-5 w-5" />
-                  <span>Paramètres du compte</span>
+                  <Star className="h-5 w-5" />
+                  <span>Mes thèmes astraux</span>
                 </CardTitle>
                 <CardDescription>
-                  Gérez vos préférences et paramètres de sécurité
+                  Vos analyses sauvegardées
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="grid gap-4 md:grid-cols-2">
-                  <Button variant="outline" className="justify-start">
-                    <Settings className="mr-2 h-4 w-4" />
-                    Paramètres de notification
-                  </Button>
-                  <Button variant="outline" className="justify-start">
-                    <User className="mr-2 h-4 w-4" />
-                    Changer le mot de passe
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="text-center p-4 bg-muted/50 rounded-lg">
+                    <p className="text-2xl font-bold text-primary">
+                      {isLoading ? '...' : chartsCount}
+                    </p>
+                    <p className="text-sm text-muted-foreground">Thèmes sauvegardés</p>
+                  </div>
+                  <div className="text-center p-4 bg-muted/50 rounded-lg">
+                    <p className="text-2xl font-bold text-primary">0</p>
+                    <p className="text-sm text-muted-foreground">Analyses partagées</p>
+                  </div>
+                </div>
+                
+                <div className="pt-4">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="w-full"
+                    onClick={() => navigate('/charts')}
+                  >
+                    <Star className="mr-2 h-4 w-4" />
+                    Voir mes thèmes
                   </Button>
                 </div>
               </CardContent>

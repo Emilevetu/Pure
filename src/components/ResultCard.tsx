@@ -18,6 +18,21 @@ interface PlanetPosition {
   house: string;
 }
 
+interface HouseCusp {
+  house: number;
+  longitude: number;
+  sign: string;
+  degrees: number;
+  minutes: number;
+}
+
+interface HouseSystem {
+  ascendant: HouseCusp;
+  mc: HouseCusp;
+  houses: HouseCusp[];
+  system: 'Placidus' | 'Equal' | 'Koch';
+}
+
 interface AstroData {
   sun: PlanetPosition;
   moon: PlanetPosition;
@@ -29,6 +44,7 @@ interface AstroData {
   uranus: PlanetPosition;
   neptune: PlanetPosition;
   pluto: PlanetPosition;
+  houseSystem?: HouseSystem;
 }
 
 interface ResultCardProps {
@@ -114,6 +130,15 @@ Calculé avec les données précises de la NASA (JPL Horizons)
     return names[planetName] || planetName;
   };
 
+  const getDegreesInSign = (longitude: number): string => {
+    const normalizedLongitude = ((longitude % 360) + 360) % 360;
+    const degreesInSign = normalizedLongitude % 30;
+    const degrees = Math.floor(degreesInSign);
+    const minutes = Math.round((degreesInSign - degrees) * 60);
+    
+    return `${degrees}°${minutes.toString().padStart(2, '0')}'`;
+  };
+
   return (
     <Card className="w-full max-w-4xl mx-auto bg-gradient-to-br from-white to-blue-50 border-2 border-blue-200 shadow-xl">
       <CardHeader className="text-center pb-6">
@@ -130,10 +155,48 @@ Calculé avec les données précises de la NASA (JPL Horizons)
       </CardHeader>
 
       <CardContent className="space-y-6">
+        {/* Ascendant et MC */}
+        {astroData.houseSystem && (
+          <div className="bg-gradient-to-r from-purple-50 to-blue-50 p-6 rounded-xl border border-purple-200">
+            <h3 className="text-xl font-bold text-center mb-4 text-purple-800">
+              🌅 Ascendant & Milieu du Ciel
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="text-center">
+                <div className="bg-white p-4 rounded-lg shadow-sm border border-purple-100">
+                  <h4 className="font-semibold text-purple-700 mb-2">🌅 Ascendant</h4>
+                  <p className="text-2xl font-bold text-purple-800">
+                    {astroData.houseSystem.ascendant.sign}
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    {astroData.houseSystem.ascendant.degrees}°{astroData.houseSystem.ascendant.minutes}'
+                  </p>
+                  <p className="text-xs text-gray-500 mt-1">Maison I</p>
+                </div>
+              </div>
+              <div className="text-center">
+                <div className="bg-white p-4 rounded-lg shadow-sm border border-purple-100">
+                  <h4 className="font-semibold text-purple-700 mb-2">🏔️ Milieu du Ciel</h4>
+                  <p className="text-2xl font-bold text-purple-800">
+                    {astroData.houseSystem.mc.sign}
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    {astroData.houseSystem.mc.degrees}°{astroData.houseSystem.mc.minutes}'
+                  </p>
+                  <p className="text-xs text-gray-500 mt-1">Maison X</p>
+                </div>
+              </div>
+            </div>
+            <p className="text-center text-sm text-gray-600 mt-3">
+              Système {astroData.houseSystem.system} • Calculé avec l'heure sidérale locale
+            </p>
+          </div>
+        )}
+
         {/* Positions planétaires */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {Object.entries(astroData)
-            .filter(([planetKey]) => planetKey !== 'planets') // Exclure la propriété 'planets'
+            .filter(([planetKey]) => planetKey !== 'planets' && planetKey !== 'houseSystem') // Exclure les propriétés non-planétaires
             .map(([planetKey, planetData]) => (
             <div
               key={planetKey}
@@ -146,34 +209,16 @@ Calculé avec les données précises de la NASA (JPL Horizons)
                 </h3>
               </div>
               
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">Position:</span>
-                  <Badge variant="outline" className="font-mono">
-                    {formatLongitude(planetData.longitude)}
-                  </Badge>
-                </div>
-                
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">Signe:</span>
-                  <Badge variant="secondary" className="bg-blue-100 text-blue-800">
-                    {planetData.sign}
-                  </Badge>
-                </div>
-                
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">Maison:</span>
-                  <Badge variant="secondary" className="bg-purple-100 text-purple-800">
-                    {planetData.house}
-                  </Badge>
-                </div>
-                
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">Latitude:</span>
-                  <span className="text-sm font-mono text-gray-700">
-                    {planetData.latitude.toFixed(2)}°
-                  </span>
-                </div>
+              <div className="text-center">
+                <p className="text-lg font-bold text-gray-800 mb-1">
+                  {planetData.sign}
+                </p>
+                <p className="text-sm text-gray-600 mb-2">
+                  {getDegreesInSign(planetData.longitude)}
+                </p>
+                <Badge variant="outline" className="border-green-300 text-green-700">
+                  {planetData.house}
+                </Badge>
               </div>
             </div>
           ))}

@@ -5,6 +5,8 @@ import { cities } from '../lib/cities';
 import { X } from 'lucide-react';
 import { convertOnboardingToBirthData } from '../lib/onboarding-utils';
 import { fetchAstroData } from '../lib/astro';
+import { ProfileService } from '../lib/profile-service';
+import { useAuth } from '../contexts/AuthContext';
 
 interface OnboardingData {
   birthDate: string;
@@ -19,6 +21,7 @@ interface OnboardingData {
 
 const Onboarding = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [currentStep, setCurrentStep] = useState(1);
   const [data, setData] = useState<OnboardingData>({
     birthDate: '',
@@ -31,6 +34,7 @@ const Onboarding = () => {
     priority: ''
   });
   const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   const totalSteps = 8;
 
@@ -56,34 +60,69 @@ const Onboarding = () => {
   }, []);
 
   const handleNext = async () => {
-    // Appel API spécial pour l'étape 3 (heure de naissance)
+    // Appel API spécial pour l'étape 3 (heure de naissance) - EN ARRIÈRE-PLAN
     if (currentStep === 3) {
-      try {
-        console.log('🚀 [Onboarding] Déclenchement de l\'appel API NASA...');
-        console.log('📊 [Onboarding] Données d\'onboarding actuelles:', data);
-        
-        // Convertir les données d'onboarding en format BirthData
-        const birthData = convertOnboardingToBirthData(data);
-        
-        // Appeler l'API NASA
-        console.log('🌍 [Onboarding] Appel de fetchAstroData avec:', birthData);
-        const astroData = await fetchAstroData(birthData);
-        
-        console.log('✅ [Onboarding] Données astrologiques récupérées:', astroData);
-        console.log('🎯 [Onboarding] Appel API NASA terminé avec succès !');
-        
-      } catch (error) {
-        console.error('❌ [Onboarding] Erreur lors de l\'appel API NASA:', error);
-        console.log('⚠️ [Onboarding] Continuons malgré l\'erreur...');
-      }
+      console.log('🚀 [Onboarding] Déclenchement de l\'appel API NASA en arrière-plan...');
+      console.log('📊 [Onboarding] Données d\'onboarding actuelles:', data);
+      
+      // Convertir les données d'onboarding en format BirthData
+      const birthData = convertOnboardingToBirthData(data);
+      
+      // Lancer l'API NASA en arrière-plan (sans await)
+      console.log('🌍 [Onboarding] Lancement de fetchAstroData en arrière-plan avec:', birthData);
+      fetchAstroData(birthData)
+        .then(astroData => {
+          console.log('✅ [Onboarding] Données astrologiques récupérées en arrière-plan:', astroData);
+          console.log('🎯 [Onboarding] Appel API NASA terminé avec succès !');
+          
+          // Mettre à jour les données astrologiques dans le profil
+          if (user?.id) {
+            ProfileService.updateAstroData(user.id, astroData)
+              .then(() => console.log('✅ [Onboarding] Données astrologiques sauvegardées'))
+              .catch(error => console.error('❌ [Onboarding] Erreur sauvegarde astro:', error));
+          }
+        })
+        .catch(error => {
+          console.error('❌ [Onboarding] Erreur lors de l\'appel API NASA en arrière-plan:', error);
+          console.log('⚠️ [Onboarding] L\'onboarding continue malgré l\'erreur...');
+        });
     }
     
-    if (currentStep < totalSteps) {
-      setCurrentStep(currentStep + 1);
+    // Sauvegarder le profil à la fin de l'onboarding
+    if (currentStep === totalSteps) {
+      if (!user?.id) {
+        console.error('❌ [Onboarding] Utilisateur non connecté');
+        navigate('/login');
+        return;
+      }
+
+      setIsSaving(true);
+      try {
+        console.log('💾 [Onboarding] Sauvegarde du profil utilisateur...');
+        
+        await ProfileService.saveUserProfile({
+          user_id: user.id,
+          birth_date: data.birthDate,
+          birth_place: data.birthPlace,
+          birth_time: data.birthTime,
+          energy_time: data.firstName,
+          resource: data.lastName,
+          group_role: data.groupRole,
+          priority: data.priority
+        });
+
+        console.log('✅ [Onboarding] Profil sauvegardé avec succès');
+        navigate('/');
+      } catch (error) {
+        console.error('❌ [Onboarding] Erreur lors de la sauvegarde:', error);
+        // Continuer malgré l'erreur
+        navigate('/');
+      } finally {
+        setIsSaving(false);
+      }
     } else {
-      // Fin de l'onboarding
-      console.log('Onboarding terminé:', data);
-      navigate('/');
+      // Navigation immédiate (pas d'attente)
+      setCurrentStep(currentStep + 1);
     }
   };
 
@@ -502,14 +541,14 @@ const Onboarding = () => {
       <div className="fixed bottom-0 left-0 right-0 bg-black p-6">
         <button
           onClick={handleNext}
-          disabled={!isStepValid()}
+          disabled={!isStepValid() || isSaving}
           className={`w-full py-4 rounded-lg text-lg font-medium transition-colors ${
-            isStepValid()
+            isStepValid() && !isSaving
               ? 'bg-white text-black hover:bg-gray-200'
               : 'bg-gray-600 text-gray-400 cursor-not-allowed'
           }`}
         >
-          {currentStep === totalSteps ? 'Terminer' : 'Suivant'}
+          {isSaving ? 'Sauvegarde...' : (currentStep === totalSteps ? 'Terminer' : 'Suivant')}
         </button>
       </div>
 

@@ -2,6 +2,7 @@
 // Maintenant connecté à JPL Horizons de la NASA !
 
 import { JPLHorizonsService, BirthCoordinates, PlanetaryPosition } from './jpl-horizons';
+import { HouseSystemService, HouseSystem } from './house-system';
 
 interface BirthData {
   date: string;
@@ -21,6 +22,7 @@ interface AstroData {
   neptune: PlanetPosition;
   pluto: PlanetPosition;
   planets: PlanetaryPosition[]; // Ajout des données brutes JPL Horizons
+  houseSystem: HouseSystem; // Système de maisons complet
 }
 
 interface PlanetPosition {
@@ -57,69 +59,75 @@ export const fetchAstroData = async (birthData: BirthData): Promise<AstroData> =
 
     console.log(`✅ ${planetaryPositions.length} positions planétaires récupérées depuis la NASA !`);
 
+    // Calculer le système de maisons
+    console.log(`🏠 Calcul du système de maisons...`);
+    const houseSystem = HouseSystemService.calculateHouseSystem(birthData, coordinates);
+    console.log(`✅ Système de maisons calculé: ${houseSystem.system}`);
+
     // Convertir les positions JPL en format AstroData
     const astroData: AstroData = {
       sun: {
         longitude: planetaryPositions.find(p => p.planetId === '10')?.longitude || 0,
         latitude: planetaryPositions.find(p => p.planetId === '10')?.latitude || 0,
         sign: getZodiacSign(planetaryPositions.find(p => p.planetId === '10')?.longitude || 0),
-        house: getHouseName(planetaryPositions.find(p => p.planetId === '10')?.longitude || 0)
+        house: `Maison ${HouseSystemService.getPlanetHouse(planetaryPositions.find(p => p.planetId === '10')?.longitude || 0, houseSystem)}`
       },
       moon: {
         longitude: planetaryPositions.find(p => p.planetId === '301')?.longitude || 0,
         latitude: planetaryPositions.find(p => p.planetId === '301')?.latitude || 0,
         sign: getZodiacSign(planetaryPositions.find(p => p.planetId === '301')?.longitude || 0),
-        house: getHouseName(planetaryPositions.find(p => p.planetId === '301')?.longitude || 0)
+        house: `Maison ${HouseSystemService.getPlanetHouse(planetaryPositions.find(p => p.planetId === '301')?.longitude || 0, houseSystem)}`
       },
       mercury: {
         longitude: planetaryPositions.find(p => p.planetId === '199')?.longitude || 0,
         latitude: planetaryPositions.find(p => p.planetId === '199')?.latitude || 0,
         sign: getZodiacSign(planetaryPositions.find(p => p.planetId === '199')?.longitude || 0),
-        house: getHouseName(planetaryPositions.find(p => p.planetId === '199')?.longitude || 0)
+        house: `Maison ${HouseSystemService.getPlanetHouse(planetaryPositions.find(p => p.planetId === '199')?.longitude || 0, houseSystem)}`
       },
       venus: {
         longitude: planetaryPositions.find(p => p.planetId === '299')?.longitude || 0,
         latitude: planetaryPositions.find(p => p.planetId === '299')?.latitude || 0,
         sign: getZodiacSign(planetaryPositions.find(p => p.planetId === '299')?.longitude || 0),
-        house: getHouseName(planetaryPositions.find(p => p.planetId === '299')?.longitude || 0)
+        house: `Maison ${HouseSystemService.getPlanetHouse(planetaryPositions.find(p => p.planetId === '299')?.longitude || 0, houseSystem)}`
       },
       mars: {
         longitude: planetaryPositions.find(p => p.planetId === '499')?.longitude || 0,
         latitude: planetaryPositions.find(p => p.planetId === '499')?.latitude || 0,
         sign: getZodiacSign(planetaryPositions.find(p => p.planetId === '499')?.longitude || 0),
-        house: getHouseName(planetaryPositions.find(p => p.planetId === '499')?.longitude || 0)
+        house: `Maison ${HouseSystemService.getPlanetHouse(planetaryPositions.find(p => p.planetId === '499')?.longitude || 0, houseSystem)}`
       },
       jupiter: {
         longitude: planetaryPositions.find(p => p.planetId === '599')?.longitude || 0,
         latitude: planetaryPositions.find(p => p.planetId === '599')?.latitude || 0,
         sign: getZodiacSign(planetaryPositions.find(p => p.planetId === '599')?.longitude || 0),
-        house: getHouseName(planetaryPositions.find(p => p.planetId === '599')?.longitude || 0)
+        house: `Maison ${HouseSystemService.getPlanetHouse(planetaryPositions.find(p => p.planetId === '599')?.longitude || 0, houseSystem)}`
       },
       saturn: {
         longitude: planetaryPositions.find(p => p.planetId === '699')?.longitude || 0,
         latitude: planetaryPositions.find(p => p.planetId === '699')?.latitude || 0,
         sign: getZodiacSign(planetaryPositions.find(p => p.planetId === '699')?.longitude || 0),
-        house: getHouseName(planetaryPositions.find(p => p.planetId === '699')?.longitude || 0)
+        house: `Maison ${HouseSystemService.getPlanetHouse(planetaryPositions.find(p => p.planetId === '699')?.longitude || 0, houseSystem)}`
       },
       uranus: {
         longitude: planetaryPositions.find(p => p.planetId === '799')?.longitude || 0,
         latitude: planetaryPositions.find(p => p.planetId === '799')?.latitude || 0,
         sign: getZodiacSign(planetaryPositions.find(p => p.planetId === '799')?.longitude || 0),
-        house: getHouseName(planetaryPositions.find(p => p.planetId === '799')?.longitude || 0)
+        house: `Maison ${HouseSystemService.getPlanetHouse(planetaryPositions.find(p => p.planetId === '799')?.longitude || 0, houseSystem)}`
       },
       neptune: {
         longitude: planetaryPositions.find(p => p.planetId === '899')?.longitude || 0,
         latitude: planetaryPositions.find(p => p.planetId === '899')?.latitude || 0,
         sign: getZodiacSign(planetaryPositions.find(p => p.planetId === '899')?.longitude || 0),
-        house: getHouseName(planetaryPositions.find(p => p.planetId === '899')?.longitude || 0)
+        house: `Maison ${HouseSystemService.getPlanetHouse(planetaryPositions.find(p => p.planetId === '899')?.longitude || 0, houseSystem)}`
       },
       pluto: {
         longitude: planetaryPositions.find(p => p.planetId === '999')?.longitude || 0,
         latitude: planetaryPositions.find(p => p.planetId === '999')?.latitude || 0,
         sign: getZodiacSign(planetaryPositions.find(p => p.planetId === '999')?.longitude || 0),
-        house: getHouseName(planetaryPositions.find(p => p.planetId === '999')?.longitude || 0)
+        house: `Maison ${HouseSystemService.getPlanetHouse(planetaryPositions.find(p => p.planetId === '999')?.longitude || 0, houseSystem)}`
       },
-      planets: planetaryPositions // Ajout des données brutes JPL Horizons
+      planets: planetaryPositions, // Ajout des données brutes JPL Horizons
+      houseSystem: houseSystem // Système de maisons complet
     };
 
     return astroData;
@@ -202,7 +210,13 @@ const fetchMockAstroData = async (birthData: BirthData): Promise<AstroData> => {
       sign: 'Capricorne',
       house: 'Maison II'
     },
-    planets: [] // Données mock vides pour les planètes brutes
+    planets: [], // Données mock vides pour les planètes brutes
+    houseSystem: {
+      ascendant: { house: 1, longitude: 0, sign: 'Bélier', degrees: 0, minutes: 0 },
+      mc: { house: 10, longitude: 270, sign: 'Capricorne', degrees: 0, minutes: 0 },
+      houses: [],
+      system: 'Placidus' as const
+    }
   };
 
   return mockData;
