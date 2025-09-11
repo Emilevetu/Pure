@@ -132,7 +132,9 @@ Calculé avec les données précises de la NASA (JPL Horizons)
       <CardContent className="space-y-6">
         {/* Positions planétaires */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {Object.entries(astroData).map(([planetKey, planetData]) => (
+          {Object.entries(astroData)
+            .filter(([planetKey]) => planetKey !== 'planets') // Exclure la propriété 'planets'
+            .map(([planetKey, planetData]) => (
             <div
               key={planetKey}
               className="bg-white rounded-lg p-4 border border-gray-200 shadow-sm hover:shadow-md transition-shadow"

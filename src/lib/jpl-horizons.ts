@@ -56,33 +56,233 @@ export class JPLHorizonsService {
   };
 
   /**
-   * Récupère les coordonnées d'une ville
+   * Récupère les coordonnées d'une ville depuis la base de données enrichie
+   * Utilise les coordonnées pré-fetchées (longitude, latitude, altitude)
+   * Fallback sur Paris, France si la ville n'est pas trouvée
    */
-  static getCityCoordinates(cityName: string): BirthCoordinates | null {
-    // Coordonnées des principales villes françaises
-    const cities: Record<string, BirthCoordinates> = {
-      'Paris, France': { longitude: 2.3522, latitude: 48.8566, altitude: 0.035 },
-      'Lyon, France': { longitude: 4.8357, latitude: 45.7640, altitude: 0.173 },
-      'Marseille, France': { longitude: 5.3698, latitude: 43.2965, altitude: 0.012 },
-      'Toulouse, France': { longitude: 1.4442, latitude: 43.6047, altitude: 0.146 },
-      'Nice, France': { longitude: 7.2619, latitude: 43.7102, altitude: 0.010 },
-      'Nantes, France': { longitude: -1.5536, latitude: 47.2184, altitude: 0.020 },
-      'Strasbourg, France': { longitude: 7.7521, latitude: 48.5734, altitude: 0.140 },
-      'Montpellier, France': { longitude: 3.8767, latitude: 43.6108, altitude: 0.027 },
-      'Bordeaux, France': { longitude: -0.5792, latitude: 44.8378, altitude: 0.010 },
-      'Lille, France': { longitude: 3.0573, latitude: 50.6292, altitude: 0.025 }
-    };
+  static async getCityCoordinates(cityName: string): Promise<BirthCoordinates | null> {
+    console.log(`🔍 [JPLHorizons] Recherche des coordonnées pour: ${cityName}`);
+    
+    try {
+      // Import de la base de données enrichie
+      const { cities } = await import('./cities');
+      
+      // Recherche de la ville dans la base enrichie
+      const cityData = cities.find(city => city.name === cityName);
+      
+      if (cityData) {
+        const coordinates: BirthCoordinates = {
+          longitude: cityData.longitude,
+          latitude: cityData.latitude,
+          altitude: cityData.altitude
+        };
+        console.log(`✅ [JPLHorizons] Coordonnées trouvées dans la base enrichie:`, coordinates);
+        return coordinates;
+      }
 
-    return cities[cityName] || null;
+      // Fallback sur Paris si la ville n'est pas trouvée
+      console.log(`⚠️ [JPLHorizons] Ville non trouvée → Fallback sur Paris, France`);
+      const parisData = cities.find(city => city.name === 'Paris, France');
+      
+      if (parisData) {
+        const parisCoordinates: BirthCoordinates = {
+          longitude: parisData.longitude,
+          latitude: parisData.latitude,
+          altitude: parisData.altitude
+        };
+        console.log(`🏛️ [JPLHorizons] Utilisation des coordonnées de Paris comme fallback:`, parisCoordinates);
+        return parisCoordinates;
+      }
+
+      // Dernier recours si même Paris n'est pas trouvé
+      console.error(`❌ [JPLHorizons] Erreur critique: Paris non trouvé dans la base de données`);
+      return null;
+      
+    } catch (error) {
+      console.error(`❌ [JPLHorizons] Erreur lors de l'import de la base de données:`, error);
+      return null;
+    }
   }
 
   /**
-   * Convertit une date/heure locale en UTC
+   * Table de correspondance pays → fuseau horaire (décalage en heures)
+   * Format: "Pays" → { été: décalage_été, hiver: décalage_hiver }
    */
-  static convertLocalToUTC(date: string, time: string): string {
-    const localDateTime = new Date(`${date}T${time}:00`);
-    const utcDateTime = new Date(localDateTime.getTime() - localDateTime.getTimezoneOffset() * 60000);
-    return utcDateTime.toISOString().slice(0, 19).replace('T', ' ');
+  private static readonly TIMEZONE_OFFSETS: Record<string, { été: number; hiver: number }> = {
+    'France': { été: 2, hiver: 1 }, // CEST (UTC+2) / CET (UTC+1)
+    'Belgique': { été: 2, hiver: 1 },
+    'Suisse': { été: 2, hiver: 1 },
+    'Luxembourg': { été: 2, hiver: 1 },
+    'Italie': { été: 2, hiver: 1 },
+    'Espagne': { été: 2, hiver: 1 },
+    'Portugal': { été: 1, hiver: 0 }, // WEST (UTC+1) / WET (UTC+0)
+    'Allemagne': { été: 2, hiver: 1 },
+    'Autriche': { été: 2, hiver: 1 },
+    'Pays-Bas': { été: 2, hiver: 1 },
+    'Danemark': { été: 2, hiver: 1 },
+    'Suède': { été: 2, hiver: 1 },
+    'Norvège': { été: 2, hiver: 1 },
+    'Finlande': { été: 3, hiver: 2 }, // EEST (UTC+3) / EET (UTC+2)
+    'Pologne': { été: 2, hiver: 1 },
+    'République tchèque': { été: 2, hiver: 1 },
+    'Slovaquie': { été: 2, hiver: 1 },
+    'Hongrie': { été: 2, hiver: 1 },
+    'Roumanie': { été: 3, hiver: 2 },
+    'Bulgarie': { été: 3, hiver: 2 },
+    'Grèce': { été: 3, hiver: 2 },
+    'Croatie': { été: 2, hiver: 1 },
+    'Slovénie': { été: 2, hiver: 1 },
+    'Estonie': { été: 3, hiver: 2 },
+    'Lettonie': { été: 3, hiver: 2 },
+    'Lituanie': { été: 3, hiver: 2 },
+    'Canada': { été: -4, hiver: -5 }, // EDT (UTC-4) / EST (UTC-5) pour l'est
+    'États-Unis': { été: -4, hiver: -5 }, // EDT (UTC-4) / EST (UTC-5) pour l'est
+    'Royaume-Uni': { été: 1, hiver: 0 }, // BST (UTC+1) / GMT (UTC+0)
+    'Irlande': { été: 1, hiver: 0 }
+  };
+
+  /**
+   * Détermine si une date est en période d'été (heure d'été)
+   * Règle : 27 mars → 27 octobre (changement d'heure fixe)
+   */
+  private static isSummerTime(date: string): boolean {
+    const year = parseInt(date.split('-')[0]);
+    const month = parseInt(date.split('-')[1]);
+    const day = parseInt(date.split('-')[2]);
+    
+    // Date de début d'été : 27 mars
+    const summerStart = new Date(year, 2, 27); // mois 2 = mars (0-indexé)
+    // Date de fin d'été : 27 octobre  
+    const summerEnd = new Date(year, 9, 27); // mois 9 = octobre (0-indexé)
+    
+    const currentDate = new Date(year, month - 1, day); // month - 1 car 0-indexé
+    
+    // Période d'été : du 27 mars au 27 octobre (inclus)
+    return currentDate >= summerStart && currentDate <= summerEnd;
+  }
+
+  /**
+   * Extrait le pays depuis le nom de la ville
+   * Format attendu: "Ville, Pays"
+   */
+  private static extractCountry(cityName: string): string {
+    const parts = cityName.split(', ');
+    return parts.length > 1 ? parts[1].trim() : 'France'; // Fallback sur France
+  }
+
+  /**
+   * Convertit une heure approximative en heure précise
+   * Gère les cas comme "environ 04:00", "par défaut 12:00"
+   */
+  private static parseApproximateTime(time: string): string {
+    // Si c'est déjà une heure précise (format HH:MM)
+    if (/^\d{1,2}:\d{2}$/.test(time)) {
+      return time;
+    }
+    
+    // Extraire l'heure des formats approximatifs
+    const timeMatch = time.match(/(\d{1,2}):(\d{2})/);
+    if (timeMatch) {
+      return `${timeMatch[1].padStart(2, '0')}:${timeMatch[2]}`;
+    }
+    
+    // Fallback sur midi si aucun format reconnu
+    console.warn(`⚠️ [JPLHorizons] Format d'heure non reconnu: ${time} → utilisation de 12:00`);
+    return '12:00';
+  }
+
+  /**
+   * Convertit une date/heure locale en UTC avec gestion des fuseaux horaires
+   * Version corrigée qui gère les fuseaux européens et les heures approximatives
+   */
+  static convertLocalToUTC(date: string, time: string, cityName: string = 'Paris, France'): string {
+    console.log(`🕐 [JPLHorizons] Conversion heure locale → UTC: ${date} ${time} (${cityName})`);
+    
+    try {
+      // 1. Parser l'heure (gérer les formats approximatifs)
+      const preciseTime = this.parseApproximateTime(time);
+      console.log(`⏰ [JPLHorizons] Heure parsée: ${time} → ${preciseTime}`);
+      
+      // 2. Extraire le pays
+      const country = this.extractCountry(cityName);
+      console.log(`🌍 [JPLHorizons] Pays détecté: ${country}`);
+      
+      // 3. Déterminer la période (été/hiver)
+      const isSummer = this.isSummerTime(date);
+      console.log(`📅 [JPLHorizons] Période: ${isSummer ? 'été' : 'hiver'}`);
+      
+      // 4. Récupérer le décalage horaire
+      const timezoneData = this.TIMEZONE_OFFSETS[country];
+      if (!timezoneData) {
+        console.warn(`⚠️ [JPLHorizons] Pays non reconnu: ${country} → utilisation du fuseau français`);
+        const offset = isSummer ? 2 : 1; // France par défaut
+        console.log(`🕐 [JPLHorizons] Décalage appliqué: UTC${offset >= 0 ? '+' : ''}${offset}`);
+        
+        // 5. Convertir en UTC
+        const [hours, minutes] = preciseTime.split(':').map(Number);
+        const totalMinutes = hours * 60 + minutes;
+        const utcMinutes = totalMinutes - (offset * 60);
+        
+        // Gérer les débordements de jour
+        let utcHours = Math.floor(utcMinutes / 60);
+        let utcMins = utcMinutes % 60;
+        
+        if (utcMins < 0) {
+          utcMins += 60;
+          utcHours -= 1;
+        }
+        if (utcHours < 0) {
+          utcHours += 24;
+        }
+        if (utcHours >= 24) {
+          utcHours -= 24;
+        }
+        
+        const utcTime = `${utcHours.toString().padStart(2, '0')}:${utcMins.toString().padStart(2, '0')}:00`;
+        const result = `${date} ${utcTime}`;
+        
+        console.log(`✅ [JPLHorizons] Conversion terminée: ${date} ${preciseTime} (${country} ${isSummer ? 'été' : 'hiver'}) → ${result} UTC`);
+        return result;
+      }
+      
+      const offset = isSummer ? timezoneData.été : timezoneData.hiver;
+      console.log(`🕐 [JPLHorizons] Décalage appliqué: UTC${offset >= 0 ? '+' : ''}${offset}`);
+      
+      // 5. Convertir en UTC
+      const [hours, minutes] = preciseTime.split(':').map(Number);
+      const totalMinutes = hours * 60 + minutes;
+      const utcMinutes = totalMinutes - (offset * 60);
+      
+      // Gérer les débordements de jour
+      let utcHours = Math.floor(utcMinutes / 60);
+      let utcMins = utcMinutes % 60;
+      
+      if (utcMins < 0) {
+        utcMins += 60;
+        utcHours -= 1;
+      }
+      if (utcHours < 0) {
+        utcHours += 24;
+      }
+      if (utcHours >= 24) {
+        utcHours -= 24;
+      }
+      
+      const utcTime = `${utcHours.toString().padStart(2, '0')}:${utcMins.toString().padStart(2, '0')}:00`;
+      const result = `${date} ${utcTime}`;
+      
+      console.log(`✅ [JPLHorizons] Conversion terminée: ${date} ${preciseTime} (${country} ${isSummer ? 'été' : 'hiver'}) → ${result} UTC`);
+      return result;
+      
+    } catch (error) {
+      console.error(`❌ [JPLHorizons] Erreur lors de la conversion UTC:`, error);
+      // Fallback sur l'ancienne méthode en cas d'erreur
+      const localDateTime = new Date(`${date}T${time}:00`);
+      const utcDateTime = new Date(localDateTime.getTime() - localDateTime.getTimezoneOffset() * 60000);
+      const fallback = utcDateTime.toISOString().slice(0, 19).replace('T', ' ');
+      console.log(`🔄 [JPLHorizons] Fallback utilisé: ${fallback}`);
+      return fallback;
+    }
   }
 
   /**

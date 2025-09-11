@@ -20,6 +20,7 @@ interface AstroData {
   uranus: PlanetPosition;
   neptune: PlanetPosition;
   pluto: PlanetPosition;
+  planets: PlanetaryPosition[]; // Ajout des données brutes JPL Horizons
 }
 
 interface PlanetPosition {
@@ -36,7 +37,7 @@ interface PlanetPosition {
 export const fetchAstroData = async (birthData: BirthData): Promise<AstroData> => {
   try {
     // Récupérer les coordonnées de la ville
-    const coordinates = JPLHorizonsService.getCityCoordinates(birthData.place);
+    const coordinates = await JPLHorizonsService.getCityCoordinates(birthData.place);
     if (!coordinates) {
       throw new Error(`Coordonnées non trouvées pour: ${birthData.place}`);
     }
@@ -44,7 +45,7 @@ export const fetchAstroData = async (birthData: BirthData): Promise<AstroData> =
     console.log(`🌍 Coordonnées trouvées pour ${birthData.place}:`, coordinates);
 
     // Convertir la date/heure locale en UTC
-    const utcDateTime = JPLHorizonsService.convertLocalToUTC(birthData.date, birthData.time);
+    const utcDateTime = JPLHorizonsService.convertLocalToUTC(birthData.date, birthData.time, birthData.place);
     console.log(`🕐 Conversion heure locale → UTC: ${birthData.date} ${birthData.time} → ${utcDateTime}`);
 
     // Récupérer les positions de toutes les planètes depuis JPL Horizons
@@ -117,7 +118,8 @@ export const fetchAstroData = async (birthData: BirthData): Promise<AstroData> =
         latitude: planetaryPositions.find(p => p.planetId === '999')?.latitude || 0,
         sign: getZodiacSign(planetaryPositions.find(p => p.planetId === '999')?.longitude || 0),
         house: getHouseName(planetaryPositions.find(p => p.planetId === '999')?.longitude || 0)
-      }
+      },
+      planets: planetaryPositions // Ajout des données brutes JPL Horizons
     };
 
     return astroData;
@@ -199,7 +201,8 @@ const fetchMockAstroData = async (birthData: BirthData): Promise<AstroData> => {
       latitude: 13.2,
       sign: 'Capricorne',
       house: 'Maison II'
-    }
+    },
+    planets: [] // Données mock vides pour les planètes brutes
   };
 
   return mockData;

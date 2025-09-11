@@ -2,13 +2,20 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Search, MapPin, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
+interface CityData {
+  name: string;
+  longitude: number;
+  latitude: number;
+  altitude: number;
+}
+
 interface AutocompleteDarkProps {
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
   className?: string;
   disabled?: boolean;
-  options: string[];
+  options: CityData[];
 }
 
 const AutocompleteDark: React.FC<AutocompleteDarkProps> = ({
@@ -20,7 +27,7 @@ const AutocompleteDark: React.FC<AutocompleteDarkProps> = ({
   options
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [filteredOptions, setFilteredOptions] = useState<string[]>([]);
+  const [filteredOptions, setFilteredOptions] = useState<CityData[]>([]);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const [inputValue, setInputValue] = useState(value);
   
@@ -49,7 +56,7 @@ const AutocompleteDark: React.FC<AutocompleteDarkProps> = ({
     }
 
     const filtered = options.filter(option =>
-      option.toLowerCase().includes(input.toLowerCase())
+      option.name.toLowerCase().includes(input.toLowerCase())
     );
     setFilteredOptions(filtered.slice(0, 8)); // Limiter à 8 suggestions
   };
@@ -70,9 +77,9 @@ const AutocompleteDark: React.FC<AutocompleteDarkProps> = ({
     }
   };
 
-  const handleOptionSelect = (option: string) => {
-    setInputValue(option);
-    onChange(option);
+  const handleOptionSelect = (option: CityData) => {
+    setInputValue(option.name);
+    onChange(option.name);
     setIsOpen(false);
     setHighlightedIndex(-1);
     inputRef.current?.blur(); // Perdre le focus au lieu de le garder
@@ -163,7 +170,7 @@ const AutocompleteDark: React.FC<AutocompleteDarkProps> = ({
         <div className="absolute top-full left-0 right-0 mt-2 bg-gray-900 rounded-xl shadow-2xl border border-gray-700 max-h-64 overflow-y-auto z-50">
           {filteredOptions.map((option, index) => (
             <button
-              key={option}
+              key={option.name}
               onClick={() => handleOptionSelect(option)}
               className={cn(
                 "w-full px-4 py-3 text-left text-sm hover:bg-gray-800 transition-colors",
@@ -173,7 +180,7 @@ const AutocompleteDark: React.FC<AutocompleteDarkProps> = ({
               type="button"
             >
               <MapPin size={16} className="text-gray-400 flex-shrink-0" />
-              <span className="truncate">{option}</span>
+              <span className="truncate">{option.name}</span>
             </button>
           ))}
         </div>

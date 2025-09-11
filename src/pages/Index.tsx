@@ -8,7 +8,7 @@ import TableauPlanetes from '../components/TableauPlanetes';
 import AIAstrologyAnalysis from '../components/AIAstrologyAnalysis';
 import { SaveChartButton } from '../components/SaveChartButton';
 import { PlanetaryPosition } from '../lib/jpl-horizons';
-import { GeocodingService } from '../lib/geocoding';
+import { fetchAstroData } from '../lib/astro';
 
 
 interface BirthData {
@@ -90,34 +90,16 @@ const Index = () => {
     try {
       console.log('📝 Données de naissance reçues:', data);
       
-      // 1. Convertir le lieu en coordonnées géographiques
-      const coordinates = await GeocodingService.getCoordinates(data.place);
-      if (!coordinates) {
-        throw new Error('Impossible de trouver les coordonnées pour cette ville');
-      }
+      // 1. Utiliser fetchAstroData qui gère tout le processus avec fallback
+      console.log('🌍 Appel de fetchAstroData avec fallback système...');
+      const astroData = await fetchAstroData(data);
       
-      console.log('📍 Coordonnées trouvées:', coordinates);
+      console.log('✅ Données astrologiques récupérées:', astroData);
       
-      // 2. Préparer les données pour l'API JPL Horizons
-      const birthDateTime = `${data.date} ${data.time}`;
-      console.log('🕐 Date/heure de naissance:', birthDateTime);
-      
-      // 3. Appeler l'API JPL Horizons via le service existant
-      const { JPLHorizonsService } = await import('../lib/jpl-horizons');
-      const planetaryPositions = await JPLHorizonsService.getAllPlanetaryPositions(
-        birthDateTime,
-        coordinates
-      );
-      
-      console.log('🌍 Positions planétaires récupérées:', planetaryPositions);
-      
-      // 4. Mettre à jour l'état
+      // 2. Mettre à jour l'état
       setBirthData(data);
-      setPlanetaryData(planetaryPositions);
-      
-      // 5. Créer astroData pour ResultCard
-      const calculatedAstroData = createAstroData(planetaryPositions);
-      setAstroData(calculatedAstroData);
+      setPlanetaryData(astroData.planets || []);
+      setAstroData(astroData);
       setShowResults(true);
       
       // Smooth scroll to results

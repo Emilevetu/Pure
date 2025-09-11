@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import AutocompleteDark from '../components/ui/autocomplete-dark';
 import { cities } from '../lib/cities';
 import { X } from 'lucide-react';
+import { convertOnboardingToBirthData } from '../lib/onboarding-utils';
+import { fetchAstroData } from '../lib/astro';
 
 interface OnboardingData {
   birthDate: string;
@@ -53,7 +55,29 @@ const Onboarding = () => {
     };
   }, []);
 
-  const handleNext = () => {
+  const handleNext = async () => {
+    // Appel API spécial pour l'étape 3 (heure de naissance)
+    if (currentStep === 3) {
+      try {
+        console.log('🚀 [Onboarding] Déclenchement de l\'appel API NASA...');
+        console.log('📊 [Onboarding] Données d\'onboarding actuelles:', data);
+        
+        // Convertir les données d'onboarding en format BirthData
+        const birthData = convertOnboardingToBirthData(data);
+        
+        // Appeler l'API NASA
+        console.log('🌍 [Onboarding] Appel de fetchAstroData avec:', birthData);
+        const astroData = await fetchAstroData(birthData);
+        
+        console.log('✅ [Onboarding] Données astrologiques récupérées:', astroData);
+        console.log('🎯 [Onboarding] Appel API NASA terminé avec succès !');
+        
+      } catch (error) {
+        console.error('❌ [Onboarding] Erreur lors de l\'appel API NASA:', error);
+        console.log('⚠️ [Onboarding] Continuons malgré l\'erreur...');
+      }
+    }
+    
     if (currentStep < totalSteps) {
       setCurrentStep(currentStep + 1);
     } else {

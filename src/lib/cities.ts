@@ -1,288 +1,1591 @@
-// Liste des villes françaises et européennes pour l'autocomplétion
-export const cities = [
-  // France - Villes principales
-  'Paris, France',
-  'Marseille, France',
-  'Lyon, France',
-  'Toulouse, France',
-  'Nice, France',
-  'Nantes, France',
-  'Strasbourg, France',
-  'Montpellier, France',
-  'Bordeaux, France',
-  'Lille, France',
-  'Rennes, France',
-  'Reims, France',
-  'Saint-Étienne, France',
-  'Toulon, France',
-  'Le Havre, France',
-  'Grenoble, France',
-  'Dijon, France',
-  'Angers, France',
-  'Villeurbanne, France',
-  'Le Mans, France',
-  'Aix-en-Provence, France',
-  'Brest, France',
-  'Nîmes, France',
-  'Limoges, France',
-  'Clermont-Ferrand, France',
-  'Tours, France',
-  'Amiens, France',
-  'Perpignan, France',
-  'Metz, France',
-  'Besançon, France',
-  'Boulogne-Billancourt, France',
-  'Orléans, France',
-  'Mulhouse, France',
-  'Rouen, France',
-  'Saint-Denis, France',
-  'Caen, France',
-  'Argenteuil, France',
-  'Saint-Paul, France',
-  'Montreuil, France',
-  'Nancy, France',
-  'Roubaix, France',
-  'Tourcoing, France',
-  'Nanterre, France',
-  'Vitry-sur-Seine, France',
-  'Avignon, France',
-  'Créteil, France',
-  'Dunkirk, France',
-  'Poitiers, France',
-  'Asnières-sur-Seine, France',
-  'Courbevoie, France',
-  'Versailles, France',
-  'Colombes, France',
-  'Fort-de-France, France',
-  'Aulnay-sous-Bois, France',
-  'Saint-Pierre, France',
-  'Rueil-Malmaison, France',
-  'Pau, France',
-  'Aubervilliers, France',
-  'Levallois-Perret, France',
-  'La Rochelle, France',
-  'Champigny-sur-Marne, France',
-  'Antibes, France',
-  'Saint-Maur-des-Fossés, France',
-  'Cannes, France',
-  'Calais, France',
-  'Bezons, France',
-  'Colmar, France',
-  'Drancy, France',
-  'Mérignac, France',
-  'Valence, France',
-  'Quimper, France',
-  'Bourges, France',
-  'Béziers, France',
-  'Bastia, France',
-  'Albi, France',
-  'Agen, France',
-  'Ajaccio, France',
-  'Annecy, France',
-  'Arras, France',
-  'Auxerre, France',
-  'Bayonne, France',
-  'Blois, France',
-  'Brive-la-Gaillarde, France',
-  'Chambéry, France',
-  'Charleville-Mézières, France',
-  'Chartres, France',
-  'Châteauroux, France',
-  'Cholet, France',
-  'Neuilly-sur-Seine, France',
-  'Cognac, France',
-  'Dunkerque, France',
-  'Épinal, France',
-  'Évreux, France',
-  'Forbach, France',
-  'Fréjus, France',
-  'Gap, France',
-  'La Roche-sur-Yon, France',
-  'Laval, France',
-  'Lorient, France',
-  'Mâcon, France',
-  'Meaux, France',
-  'Melun, France',
-  'Moulins, France',
-  'Nevers, France',
-  'Niort, France',
-  'Périgueux, France',
-  'Saint-Brieuc, France',
-  'Saint-Malo, France',
-  'Saint-Nazaire, France',
-  'Saint-Quentin, France',
-  'Sète, France',
-  'Tarbes, France',
-  'Thionville, France',
-  'Troyes, France',
-  'Valenciennes, France',
-  'Vannes, France',
-  'Vienne, France',
-  'Villefranche-sur-Saône, France',
+// Liste des villes avec coordonnées pour l'autocomplétion et les calculs astrologiques
+export interface CityData {
+  name: string;
+  longitude: number;
+  latitude: number;
+  altitude: number;
+}
 
-  // Europe - Capitales et grandes villes
-  'Londres, Royaume-Uni',
-  'Berlin, Allemagne',
-  'Madrid, Espagne',
-  'Rome, Italie',
-  'Amsterdam, Pays-Bas',
-  'Bruxelles, Belgique',
-  'Vienne, Autriche',
-  'Prague, République tchèque',
-  'Budapest, Hongrie',
-  'Varsovie, Pologne',
-  'Stockholm, Suède',
-  'Oslo, Norvège',
-  'Copenhague, Danemark',
-  'Helsinki, Finlande',
-  'Dublin, Irlande',
-  'Lisbonne, Portugal',
-  'Athènes, Grèce',
-  'Bucarest, Roumanie',
-  'Sofia, Bulgarie',
-  'Zagreb, Croatie',
-  'Ljubljana, Slovénie',
-  'Bratislava, Slovaquie',
-  'Tallinn, Estonie',
-  'Riga, Lettonie',
-  'Vilnius, Lituanie',
-  'Bratislava, Slovaquie',
-  'Luxembourg, Luxembourg',
-  'Monaco, Monaco',
-  'Andorre-la-Vieille, Andorre',
-  'San Marino, San Marino',
-  'Vatican, Vatican',
-  'Malte, Malte',
-  'Chypre, Chypre',
-  'Islande, Islande',
-  'Liechtenstein, Liechtenstein',
-
-  // Villes européennes importantes
-  'Manchester, Royaume-Uni',
-  'Birmingham, Royaume-Uni',
-  'Liverpool, Royaume-Uni',
-  'Glasgow, Royaume-Uni',
-  'Edimbourg, Royaume-Uni',
-  'Hambourg, Allemagne',
-  'Munich, Allemagne',
-  'Cologne, Allemagne',
-  'Francfort, Allemagne',
-  'Stuttgart, Allemagne',
-  'Düsseldorf, Allemagne',
-  'Dortmund, Allemagne',
-  'Essen, Allemagne',
-  'Leipzig, Allemagne',
-  'Barcelone, Espagne',
-  'Valence, Espagne',
-  'Séville, Espagne',
-  'Saragosse, Espagne',
-  'Málaga, Espagne',
-  'Milan, Italie',
-  'Naples, Italie',
-  'Turin, Italie',
-  'Palerme, Italie',
-  'Gênes, Italie',
-  'Bologne, Italie',
-  'Florence, Italie',
-  'Rotterdam, Pays-Bas',
-  'La Haye, Pays-Bas',
-  'Utrecht, Pays-Bas',
-  'Eindhoven, Pays-Bas',
-  'Anvers, Belgique',
-  'Gand, Belgique',
-  'Charleroi, Belgique',
-  'Liège, Belgique',
-  'Graz, Autriche',
-  'Linz, Autriche',
-  'Salzbourg, Autriche',
-  'Innsbruck, Autriche',
-  'Porto, Portugal',
-  'Coimbra, Portugal',
-  'Braga, Portugal',
-  'Thessalonique, Grèce',
-  'Patras, Grèce',
-  'Larissa, Grèce',
-  'Heraklion, Grèce',
-  'Cluj-Napoca, Roumanie',
-  'Timișoara, Roumanie',
-  'Iași, Roumanie',
-  'Constanța, Roumanie',
-  'Plovdiv, Bulgarie',
-  'Varna, Bulgarie',
-  'Bourgas, Bulgarie',
-  'Split, Croatie',
-  'Rijeka, Croatie',
-  'Osijek, Croatie',
-  'Maribor, Slovénie',
-  'Celje, Slovénie',
-  'Kranj, Slovénie',
-  'Košice, Slovaquie',
-  'Žilina, Slovaquie',
-  'Nitra, Slovaquie',
-  'Tartu, Estonie',
-  'Narva, Estonie',
-  'Pärnu, Estonie',
-  'Daugavpils, Lettonie',
-  'Liepāja, Lettonie',
-  'Jelgava, Lettonie',
-  'Kaunas, Lituanie',
-  'Klaipėda, Lituanie',
-  'Šiauliai, Lituanie',
-
-  // Villes suisses
-  'Zurich, Suisse',
-  'Genève, Suisse',
-  'Bâle, Suisse',
-  'Berne, Suisse',
-  'Lausanne, Suisse',
-  'Winterthour, Suisse',
-  'Saint-Gall, Suisse',
-  'Lucerne, Suisse',
-  'Lugano, Suisse',
-  'Bienne, Suisse',
-
-  // Villes canadiennes (francophones)
-  'Montréal, Canada',
-  'Québec, Canada',
-  'Ottawa, Canada',
-  'Toronto, Canada',
-  'Vancouver, Canada',
-  'Calgary, Canada',
-  'Edmonton, Canada',
-  'Winnipeg, Canada',
-  'Halifax, Canada',
-
-  // Villes belges
-  'Bruxelles, Belgique',
-  'Anvers, Belgique',
-  'Gand, Belgique',
-  'Charleroi, Belgique',
-  'Liège, Belgique',
-  'Bruges, Belgique',
-  'Namur, Belgique',
-  'Mons, Belgique',
-  'Louvain, Belgique',
-  'Tournai, Belgique',
-
-  // Villes luxembourgeoises
-  'Luxembourg, Luxembourg',
-  'Esch-sur-Alzette, Luxembourg',
-  'Differdange, Luxembourg',
-  'Dudelange, Luxembourg',
-  'Ettelbruck, Luxembourg',
-  'Diekirch, Luxembourg',
-  'Wiltz, Luxembourg',
-  'Grevenmacher, Luxembourg',
-  'Remich, Luxembourg',
-  'Vianden, Luxembourg'
+export const cities: CityData[] = [
+  {
+    name: "Paris, France",
+    longitude: 2.3483915,
+    latitude: 48.8534951,
+    altitude: 0.035
+  },
+  {
+    name: "Marseille, France",
+    longitude: 5.3699525,
+    latitude: 43.2961743,
+    altitude: 0.035
+  },
+  {
+    name: "Lyon, France",
+    longitude: 4.8320114,
+    latitude: 45.7578137,
+    altitude: 0.035
+  },
+  {
+    name: "Toulouse, France",
+    longitude: 1.4442469,
+    latitude: 43.6044622,
+    altitude: 0.035
+  },
+  {
+    name: "Nice, France",
+    longitude: 7.2683912,
+    latitude: 43.7009358,
+    altitude: 0.035
+  },
+  {
+    name: "Nantes, France",
+    longitude: -1.5541362,
+    latitude: 47.2186371,
+    altitude: 0.035
+  },
+  {
+    name: "Strasbourg, France",
+    longitude: 7.7507127,
+    latitude: 48.584614,
+    altitude: 0.035
+  },
+  {
+    name: "Montpellier, France",
+    longitude: 3.8767337,
+    latitude: 43.6112422,
+    altitude: 0.035
+  },
+  {
+    name: "Bordeaux, France",
+    longitude: -0.5800364,
+    latitude: 44.841225,
+    altitude: 0.035
+  },
+  {
+    name: "Lille, France",
+    longitude: 3.0635282,
+    latitude: 50.6365654,
+    altitude: 0.035
+  },
+  {
+    name: "Rennes, France",
+    longitude: -1.6800198,
+    latitude: 48.1113387,
+    altitude: 0.035
+  },
+  {
+    name: "Reims, France",
+    longitude: 4.031926,
+    latitude: 49.2577886,
+    altitude: 0.035
+  },
+  {
+    name: "Saint-Étienne, France",
+    longitude: 4.3873058,
+    latitude: 45.4401467,
+    altitude: 0.035
+  },
+  {
+    name: "Toulon, France",
+    longitude: 5.9304919,
+    latitude: 43.1257311,
+    altitude: 0.035
+  },
+  {
+    name: "Le Havre, France",
+    longitude: 0.1079732,
+    latitude: 49.4938975,
+    altitude: 0.035
+  },
+  {
+    name: "Grenoble, France",
+    longitude: 5.7357819,
+    latitude: 45.1875602,
+    altitude: 0.035
+  },
+  {
+    name: "Dijon, France",
+    longitude: 5.0414701,
+    latitude: 47.3215806,
+    altitude: 0.035
+  },
+  {
+    name: "Angers, France",
+    longitude: -0.5515588,
+    latitude: 47.4739884,
+    altitude: 0.035
+  },
+  {
+    name: "Villeurbanne, France",
+    longitude: 4.8868454,
+    latitude: 45.7733573,
+    altitude: 0.035
+  },
+  {
+    name: "Le Mans, France",
+    longitude: 0.1967849,
+    latitude: 48.0073849,
+    altitude: 0.035
+  },
+  {
+    name: "Aix-en-Provence, France",
+    longitude: 5.4474738,
+    latitude: 43.5298424,
+    altitude: 0.035
+  },
+  {
+    name: "Brest, France",
+    longitude: -4.4860088,
+    latitude: 48.3905283,
+    altitude: 0.035
+  },
+  {
+    name: "Nîmes, France",
+    longitude: 4.3600687,
+    latitude: 43.8374249,
+    altitude: 0.035
+  },
+  {
+    name: "Limoges, France",
+    longitude: 1.2644847,
+    latitude: 45.8354243,
+    altitude: 0.035
+  },
+  {
+    name: "Clermont-Ferrand, France",
+    longitude: 3.0819427,
+    latitude: 45.7774551,
+    altitude: 0.035
+  },
+  {
+    name: "Tours, France",
+    longitude: 0.6889268,
+    latitude: 47.3900474,
+    altitude: 0.035
+  },
+  {
+    name: "Amiens, France",
+    longitude: 2.2956951,
+    latitude: 49.8941708,
+    altitude: 0.035
+  },
+  {
+    name: "Perpignan, France",
+    longitude: 2.8953121,
+    latitude: 42.6985304,
+    altitude: 0.035
+  },
+  {
+    name: "Metz, France",
+    longitude: 6.1763552,
+    latitude: 49.1196964,
+    altitude: 0.035
+  },
+  {
+    name: "Besançon, France",
+    longitude: 6.0243622,
+    latitude: 47.2380222,
+    altitude: 0.035
+  },
+  {
+    name: "Boulogne-Billancourt, France",
+    longitude: 2.240206,
+    latitude: 48.8356649,
+    altitude: 0.035
+  },
+  {
+    name: "Orléans, France",
+    longitude: 1.9086066,
+    latitude: 47.9027336,
+    altitude: 0.035
+  },
+  {
+    name: "Mulhouse, France",
+    longitude: 7.3389937,
+    latitude: 47.7467233,
+    altitude: 0.035
+  },
+  {
+    name: "Rouen, France",
+    longitude: 1.0939658,
+    latitude: 49.4404591,
+    altitude: 0.035
+  },
+  {
+    name: "Saint-Denis, France",
+    longitude: 2.3580232,
+    latitude: 48.935773,
+    altitude: 0.035
+  },
+  {
+    name: "Caen, France",
+    longitude: -0.3635615,
+    latitude: 49.1813403,
+    altitude: 0.035
+  },
+  {
+    name: "Argenteuil, France",
+    longitude: 2.2481797,
+    latitude: 48.9479069,
+    altitude: 0.035
+  },
+  {
+    name: "Saint-Paul, France",
+    longitude: 2.0100016,
+    latitude: 49.4318046,
+    altitude: 0.035
+  },
+  {
+    name: "Montreuil, France",
+    longitude: 1.7631125,
+    latitude: 50.4638918,
+    altitude: 0.035
+  },
+  {
+    name: "Nancy, France",
+    longitude: 6.1834097,
+    latitude: 48.6937223,
+    altitude: 0.035
+  },
+  {
+    name: "Roubaix, France",
+    longitude: 3.1741734,
+    latitude: 50.6915893,
+    altitude: 0.035
+  },
+  {
+    name: "Tourcoing, France",
+    longitude: 3.1605714,
+    latitude: 50.7235038,
+    altitude: 0.035
+  },
+  {
+    name: "Nanterre, France",
+    longitude: 2.2071267,
+    latitude: 48.8924273,
+    altitude: 0.035
+  },
+  {
+    name: "Vitry-sur-Seine, France",
+    longitude: 2.39164,
+    latitude: 48.7876,
+    altitude: 0.035
+  },
+  {
+    name: "Avignon, France",
+    longitude: 4.8059012,
+    latitude: 43.9492493,
+    altitude: 0.035
+  },
+  {
+    name: "Créteil, France",
+    longitude: 2.4530731,
+    latitude: 48.7771486,
+    altitude: 0.035
+  },
+  {
+    name: "Dunkirk, France",
+    longitude: 2.3772525,
+    latitude: 51.0347708,
+    altitude: 0.035
+  },
+  {
+    name: "Poitiers, France",
+    longitude: 0.340196,
+    latitude: 46.5802596,
+    altitude: 0.035
+  },
+  {
+    name: "Asnières-sur-Seine, France",
+    longitude: 2.2890454,
+    latitude: 48.9105948,
+    altitude: 0.035
+  },
+  {
+    name: "Courbevoie, France",
+    longitude: 2.2561602,
+    latitude: 48.8953328,
+    altitude: 0.035
+  },
+  {
+    name: "Versailles, France",
+    longitude: 2.1266886,
+    latitude: 48.8035403,
+    altitude: 0.035
+  },
+  {
+    name: "Colombes, France",
+    longitude: 2.2543631,
+    latitude: 48.9227298,
+    altitude: 0.035
+  },
+  {
+    name: "Fort-de-France, France",
+    longitude: -61.0676724,
+    latitude: 14.6027962,
+    altitude: 0.035
+  },
+  {
+    name: "Aulnay-sous-Bois, France",
+    longitude: 2.499789,
+    latitude: 48.934231,
+    altitude: 0.035
+  },
+  {
+    name: "Saint-Pierre, France",
+    longitude: 7.4718731,
+    latitude: 48.3832725,
+    altitude: 0.035
+  },
+  {
+    name: "Rueil-Malmaison, France",
+    longitude: 2.1802832,
+    latitude: 48.87778,
+    altitude: 0.035
+  },
+  {
+    name: "Pau, France",
+    longitude: -0.3685668,
+    latitude: 43.2957547,
+    altitude: 0.035
+  },
+  {
+    name: "Aubervilliers, France",
+    longitude: 2.3821895,
+    latitude: 48.9146078,
+    altitude: 0.035
+  },
+  {
+    name: "Levallois-Perret, France",
+    longitude: 2.2881683,
+    latitude: 48.892956,
+    altitude: 0.035
+  },
+  {
+    name: "La Rochelle, France",
+    longitude: -1.1515951,
+    latitude: 46.159732,
+    altitude: 0.035
+  },
+  {
+    name: "Champigny-sur-Marne, France",
+    longitude: 2.510611,
+    latitude: 48.8137847,
+    altitude: 0.035
+  },
+  {
+    name: "Antibes, France",
+    longitude: 7.1262071,
+    latitude: 43.5812868,
+    altitude: 0.035
+  },
+  {
+    name: "Saint-Maur-des-Fossés, France",
+    longitude: 2.4853015,
+    latitude: 48.8033057,
+    altitude: 0.035
+  },
+  {
+    name: "Cannes, France",
+    longitude: 7.0134418,
+    latitude: 43.5515198,
+    altitude: 0.035
+  },
+  {
+    name: "Calais, France",
+    longitude: 1.8538446,
+    latitude: 50.9524769,
+    altitude: 0.035
+  },
+  {
+    name: "Bezons, France",
+    longitude: 2.2105491,
+    latitude: 48.9250016,
+    altitude: 0.035
+  },
+  {
+    name: "Colmar, France",
+    longitude: 7.3579641,
+    latitude: 48.0777517,
+    altitude: 0.035
+  },
+  {
+    name: "Drancy, France",
+    longitude: 2.4455201,
+    latitude: 48.9229803,
+    altitude: 0.035
+  },
+  {
+    name: "Mérignac, France",
+    longitude: -0.6469022,
+    latitude: 44.842168,
+    altitude: 0.035
+  },
+  {
+    name: "Valence, France",
+    longitude: 4.8920811,
+    latitude: 44.9332277,
+    altitude: 0.035
+  },
+  {
+    name: "Quimper, France",
+    longitude: -4.1024782,
+    latitude: 47.9960325,
+    altitude: 0.035
+  },
+  {
+    name: "Bourges, France",
+    longitude: 2.399125,
+    latitude: 47.0811658,
+    altitude: 0.035
+  },
+  {
+    name: "Béziers, France",
+    longitude: 3.2131307,
+    latitude: 43.3426562,
+    altitude: 0.035
+  },
+  {
+    name: "Bastia, France",
+    longitude: 9.4509187,
+    latitude: 42.6993979,
+    altitude: 0.035
+  },
+  {
+    name: "Albi, France",
+    longitude: 2.147899,
+    latitude: 43.9277552,
+    altitude: 0.035
+  },
+  {
+    name: "Agen, France",
+    longitude: 0.6176112,
+    latitude: 44.2015827,
+    altitude: 0.035
+  },
+  {
+    name: "Ajaccio, France",
+    longitude: 8.7376029,
+    latitude: 41.9263991,
+    altitude: 0.035
+  },
+  {
+    name: "Annecy, France",
+    longitude: 6.1288847,
+    latitude: 45.8992348,
+    altitude: 0.035
+  },
+  {
+    name: "Arras, France",
+    longitude: 2.7772211,
+    latitude: 50.291048,
+    altitude: 0.035
+  },
+  {
+    name: "Auxerre, France",
+    longitude: 3.570579,
+    latitude: 47.7961287,
+    altitude: 0.035
+  },
+  {
+    name: "Bayonne, France",
+    longitude: -1.4736657,
+    latitude: 43.4945144,
+    altitude: 0.035
+  },
+  {
+    name: "Blois, France",
+    longitude: 1.3337639,
+    latitude: 47.5876861,
+    altitude: 0.035
+  },
+  {
+    name: "Brive-la-Gaillarde, France",
+    longitude: 1.5332389,
+    latitude: 45.1584982,
+    altitude: 0.035
+  },
+  {
+    name: "Chambéry, France",
+    longitude: 5.9203636,
+    latitude: 45.5662672,
+    altitude: 0.035
+  },
+  {
+    name: "Charleville-Mézières, France",
+    longitude: 4.7206939,
+    latitude: 49.7735712,
+    altitude: 0.035
+  },
+  {
+    name: "Chartres, France",
+    longitude: 1.4881434,
+    latitude: 48.4438601,
+    altitude: 0.035
+  },
+  {
+    name: "Châteauroux, France",
+    longitude: 1.6770956,
+    latitude: 46.8203785,
+    altitude: 0.035
+  },
+  {
+    name: "Cholet, France",
+    longitude: -0.8801359,
+    latitude: 47.0617293,
+    altitude: 0.035
+  },
+  {
+    name: "Neuilly-sur-Seine, France",
+    longitude: 2.2695658,
+    latitude: 48.884683,
+    altitude: 0.035
+  },
+  {
+    name: "Cognac, France",
+    longitude: -0.3250175,
+    latitude: 45.6931647,
+    altitude: 0.035
+  },
+  {
+    name: "Dunkerque, France",
+    longitude: 2.3772525,
+    latitude: 51.0347708,
+    altitude: 0.035
+  },
+  {
+    name: "Épinal, France",
+    longitude: 6.4503643,
+    latitude: 48.1747684,
+    altitude: 0.035
+  },
+  {
+    name: "Évreux, France",
+    longitude: 1.1510164,
+    latitude: 49.0268903,
+    altitude: 0.035
+  },
+  {
+    name: "Forbach, France",
+    longitude: 6.8958562,
+    latitude: 49.1862822,
+    altitude: 0.035
+  },
+  {
+    name: "Fréjus, France",
+    longitude: 6.7360182,
+    latitude: 43.4330308,
+    altitude: 0.035
+  },
+  {
+    name: "Gap, France",
+    longitude: 6.0820639,
+    latitude: 44.5612032,
+    altitude: 0.035
+  },
+  {
+    name: "La Roche-sur-Yon, France",
+    longitude: -1.4269698,
+    latitude: 46.6705431,
+    altitude: 0.035
+  },
+  {
+    name: "Laval, France",
+    longitude: -0.7734022,
+    latitude: 48.0706687,
+    altitude: 0.035
+  },
+  {
+    name: "Lorient, France",
+    longitude: -3.3660907,
+    latitude: 47.7477336,
+    altitude: 0.035
+  },
+  {
+    name: "Mâcon, France",
+    longitude: 4.8322266,
+    latitude: 46.3036683,
+    altitude: 0.035
+  },
+  {
+    name: "Meaux, France",
+    longitude: 2.8773541,
+    latitude: 48.9582708,
+    altitude: 0.035
+  },
+  {
+    name: "Melun, France",
+    longitude: 2.6608169,
+    latitude: 48.539927,
+    altitude: 0.035
+  },
+  {
+    name: "Moulins, France",
+    longitude: 3.3331703,
+    latitude: 46.5660526,
+    altitude: 0.035
+  },
+  {
+    name: "Nevers, France",
+    longitude: 3.1577203,
+    latitude: 46.9876601,
+    altitude: 0.035
+  },
+  {
+    name: "Niort, France",
+    longitude: -0.4646064,
+    latitude: 46.3239233,
+    altitude: 0.035
+  },
+  {
+    name: "Périgueux, France",
+    longitude: 0.7184407,
+    latitude: 45.1909365,
+    altitude: 0.035
+  },
+  {
+    name: "Saint-Brieuc, France",
+    longitude: -2.7603283,
+    latitude: 48.5141134,
+    altitude: 0.035
+  },
+  {
+    name: "Saint-Malo, France",
+    longitude: -2.0260409,
+    latitude: 48.649518,
+    altitude: 0.035
+  },
+  {
+    name: "Saint-Nazaire, France",
+    longitude: -2.2138905,
+    latitude: 47.2733517,
+    altitude: 0.035
+  },
+  {
+    name: "Saint-Quentin, France",
+    longitude: 3.2876843,
+    latitude: 49.8465253,
+    altitude: 0.035
+  },
+  {
+    name: "Sète, France",
+    longitude: 3.6959771,
+    latitude: 43.4014434,
+    altitude: 0.035
+  },
+  {
+    name: "Tarbes, France",
+    longitude: 0.0781021,
+    latitude: 43.232858,
+    altitude: 0.035
+  },
+  {
+    name: "Thionville, France",
+    longitude: 6.1675872,
+    latitude: 49.3579272,
+    altitude: 0.035
+  },
+  {
+    name: "Troyes, France",
+    longitude: 4.0746257,
+    latitude: 48.2971626,
+    altitude: 0.035
+  },
+  {
+    name: "Valenciennes, France",
+    longitude: 3.5234846,
+    latitude: 50.3579317,
+    altitude: 0.035
+  },
+  {
+    name: "Vannes, France",
+    longitude: -2.7599079,
+    latitude: 47.6586772,
+    altitude: 0.035
+  },
+  {
+    name: "Vienne, France",
+    longitude: 0.465407,
+    latitude: 46.6121165,
+    altitude: 0.035
+  },
+  {
+    name: "Villefranche-sur-Saône, France",
+    longitude: 4.726611,
+    latitude: 45.9864749,
+    altitude: 0.035
+  },
+  {
+    name: "Londres, Royaume-Uni",
+    longitude: -0.1440551,
+    latitude: 51.4893335,
+    altitude: 0.035
+  },
+  {
+    name: "Berlin, Allemagne",
+    longitude: 13.3989367,
+    latitude: 52.510885,
+    altitude: 0.035
+  },
+  {
+    name: "Madrid, Espagne",
+    longitude: -3.7035825,
+    latitude: 40.4167047,
+    altitude: 0.035
+  },
+  {
+    name: "Rome, Italie",
+    longitude: 12.4829321,
+    latitude: 41.8933203,
+    altitude: 0.035
+  },
+  {
+    name: "Amsterdam, Pays-Bas",
+    longitude: 4.8924534,
+    latitude: 52.3730796,
+    altitude: 0.035
+  },
+  {
+    name: "Bruxelles, Belgique",
+    longitude: 4.351697,
+    latitude: 50.8465573,
+    altitude: 0.035
+  },
+  {
+    name: "Vienne, Autriche",
+    longitude: 16.3725042,
+    latitude: 48.2083537,
+    altitude: 0.035
+  },
+  {
+    name: "Prague, République tchèque",
+    longitude: 14.4464593,
+    latitude: 50.0596288,
+    altitude: 0.035
+  },
+  {
+    name: "Budapest, Hongrie",
+    longitude: 19.1460941,
+    latitude: 47.4813896,
+    altitude: 0.035
+  },
+  {
+    name: "Varsovie, Pologne",
+    longitude: 21.0067249,
+    latitude: 52.2319581,
+    altitude: 0.035
+  },
+  {
+    name: "Stockholm, Suède",
+    longitude: 18.0710935,
+    latitude: 59.3251172,
+    altitude: 0.035
+  },
+  {
+    name: "Oslo, Norvège",
+    longitude: 10.7389701,
+    latitude: 59.9133301,
+    altitude: 0.035
+  },
+  {
+    name: "Copenhague, Danemark",
+    longitude: 12.5700724,
+    latitude: 55.6867243,
+    altitude: 0.035
+  },
+  {
+    name: "Helsinki, Finlande",
+    longitude: 24.9384719,
+    latitude: 60.1698897,
+    altitude: 0.035
+  },
+  {
+    name: "Dublin, Irlande",
+    longitude: -6.2605593,
+    latitude: 53.3493795,
+    altitude: 0.035
+  },
+  {
+    name: "Lisbonne, Portugal",
+    longitude: -9.1365919,
+    latitude: 38.7077507,
+    altitude: 0.035
+  },
+  {
+    name: "Athènes, Grèce",
+    longitude: 23.7348324,
+    latitude: 37.9755648,
+    altitude: 0.035
+  },
+  {
+    name: "Bucarest, Roumanie",
+    longitude: 26.1027202,
+    latitude: 44.4361414,
+    altitude: 0.035
+  },
+  {
+    name: "Sofia, Bulgarie",
+    longitude: 23.3217359,
+    latitude: 42.6977028,
+    altitude: 0.035
+  },
+  {
+    name: "Zagreb, Croatie",
+    longitude: 15.9772795,
+    latitude: 45.8130967,
+    altitude: 0.035
+  },
+  {
+    name: "Ljubljana, Slovénie",
+    longitude: 14.5069289,
+    latitude: 46.0500268,
+    altitude: 0.035
+  },
+  {
+    name: "Bratislava, Slovaquie",
+    longitude: 17.1093063,
+    latitude: 48.1516988,
+    altitude: 0.035
+  },
+  {
+    name: "Tallinn, Estonie",
+    longitude: 24.7453688,
+    latitude: 59.4372155,
+    altitude: 0.035
+  },
+  {
+    name: "Riga, Lettonie",
+    longitude: 24.1051846,
+    latitude: 56.9493977,
+    altitude: 0.035
+  },
+  {
+    name: "Vilnius, Lituanie",
+    longitude: 25.2829111,
+    latitude: 54.6870458,
+    altitude: 0.035
+  },
+  {
+    name: "Luxembourg, Luxembourg",
+    longitude: 6.1296751,
+    latitude: 49.8158683,
+    altitude: 0.035
+  },
+  {
+    name: "Monaco, Monaco",
+    longitude: 2.7166464,
+    latitude: 46.1012225,
+    altitude: 0.035
+  },
+  {
+    name: "Andorre-la-Vieille, Andorre",
+    longitude: 1.5212467,
+    latitude: 42.5069391,
+    altitude: 0.035
+  },
+  {
+    name: "San Marino, San Marino",
+    longitude: 12.458306,
+    latitude: 43.9458623,
+    altitude: 0.035
+  },
+  {
+    name: "Vatican, Vatican",
+    longitude: 12.4528349,
+    latitude: 41.9034912,
+    altitude: 0.035
+  },
+  {
+    name: "Malte, Malte",
+    longitude: 14.4476911,
+    latitude: 35.8885993,
+    altitude: 0.035
+  },
+  {
+    name: "Chypre, Chypre",
+    longitude: 32.8899027,
+    latitude: 34.9174159,
+    altitude: 0.035
+  },
+  {
+    name: "Islande, Islande",
+    longitude: -18.1059013,
+    latitude: 64.9841821,
+    altitude: 0.035
+  },
+  {
+    name: "Liechtenstein, Liechtenstein",
+    longitude: 9.5531527,
+    latitude: 47.1416307,
+    altitude: 0.035
+  },
+  {
+    name: "Manchester, Royaume-Uni",
+    longitude: -2.2451148,
+    latitude: 53.4794892,
+    altitude: 0.035
+  },
+  {
+    name: "Birmingham, Royaume-Uni",
+    longitude: -1.9026911,
+    latitude: 52.4796992,
+    altitude: 0.035
+  },
+  {
+    name: "Liverpool, Royaume-Uni",
+    longitude: -2.99168,
+    latitude: 53.4071991,
+    altitude: 0.035
+  },
+  {
+    name: "Glasgow, Royaume-Uni",
+    longitude: -4.2501687,
+    latitude: 55.861155,
+    altitude: 0.035
+  },
+  {
+    name: "Edimbourg, Royaume-Uni",
+    longitude: -3.1883749,
+    latitude: 55.9533456,
+    altitude: 0.035
+  },
+  {
+    name: "Hambourg, Allemagne",
+    longitude: 10.000654,
+    latitude: 53.550341,
+    altitude: 0.035
+  },
+  {
+    name: "Munich, Allemagne",
+    longitude: 11.5753822,
+    latitude: 48.1371079,
+    altitude: 0.035
+  },
+  {
+    name: "Cologne, Allemagne",
+    longitude: 6.959974,
+    latitude: 50.938361,
+    altitude: 0.035
+  },
+  {
+    name: "Francfort, Allemagne",
+    longitude: 8.6820917,
+    latitude: 50.1106444,
+    altitude: 0.035
+  },
+  {
+    name: "Stuttgart, Allemagne",
+    longitude: 9.1800132,
+    latitude: 48.7784485,
+    altitude: 0.035
+  },
+  {
+    name: "Düsseldorf, Allemagne",
+    longitude: 6.7763137,
+    latitude: 51.2254018,
+    altitude: 0.035
+  },
+  {
+    name: "Dortmund, Allemagne",
+    longitude: 7.4652789,
+    latitude: 51.5142273,
+    altitude: 0.035
+  },
+  {
+    name: "Essen, Allemagne",
+    longitude: 7.0158171,
+    latitude: 51.4582235,
+    altitude: 0.035
+  },
+  {
+    name: "Leipzig, Allemagne",
+    longitude: 12.3747329,
+    latitude: 51.3406321,
+    altitude: 0.035
+  },
+  {
+    name: "Barcelone, Espagne",
+    longitude: 2.177073,
+    latitude: 41.3825802,
+    altitude: 0.035
+  },
+  {
+    name: "Valence, Espagne",
+    longitude: -0.3763353,
+    latitude: 39.4697065,
+    altitude: 0.035
+  },
+  {
+    name: "Séville, Espagne",
+    longitude: -5.9953403,
+    latitude: 37.3886303,
+    altitude: 0.035
+  },
+  {
+    name: "Saragosse, Espagne",
+    longitude: -0.8809428,
+    latitude: 41.6521342,
+    altitude: 0.035
+  },
+  {
+    name: "Málaga, Espagne",
+    longitude: -4.4216366,
+    latitude: 36.7213028,
+    altitude: 0.035
+  },
+  {
+    name: "Milan, Italie",
+    longitude: 9.1896346,
+    latitude: 45.4641943,
+    altitude: 0.035
+  },
+  {
+    name: "Naples, Italie",
+    longitude: 14.2487679,
+    latitude: 40.8358846,
+    altitude: 0.035
+  },
+  {
+    name: "Turin, Italie",
+    longitude: 7.6824892,
+    latitude: 45.0677551,
+    altitude: 0.035
+  },
+  {
+    name: "Palerme, Italie",
+    longitude: 13.3524434,
+    latitude: 38.1112268,
+    altitude: 0.035
+  },
+  {
+    name: "Gênes, Italie",
+    longitude: 8.9338624,
+    latitude: 44.40726,
+    altitude: 0.035
+  },
+  {
+    name: "Bologne, Italie",
+    longitude: 11.3426327,
+    latitude: 44.4938203,
+    altitude: 0.035
+  },
+  {
+    name: "Florence, Italie",
+    longitude: 11.2556404,
+    latitude: 43.7697955,
+    altitude: 0.035
+  },
+  {
+    name: "Rotterdam, Pays-Bas",
+    longitude: 4.47775,
+    latitude: 51.9244424,
+    altitude: 0.035
+  },
+  {
+    name: "La Haye, Pays-Bas",
+    longitude: 4.3113461,
+    latitude: 52.0799838,
+    altitude: 0.035
+  },
+  {
+    name: "Utrecht, Pays-Bas",
+    longitude: 5.1215634,
+    latitude: 52.0907006,
+    altitude: 0.035
+  },
+  {
+    name: "Eindhoven, Pays-Bas",
+    longitude: 5.478633,
+    latitude: 51.4392648,
+    altitude: 0.035
+  },
+  {
+    name: "Anvers, Belgique",
+    longitude: 4.3997081,
+    latitude: 51.2211097,
+    altitude: 0.035
+  },
+  {
+    name: "Gand, Belgique",
+    longitude: 3.7250121,
+    latitude: 51.0538286,
+    altitude: 0.035
+  },
+  {
+    name: "Charleroi, Belgique",
+    longitude: 4.444528,
+    latitude: 50.4116233,
+    altitude: 0.035
+  },
+  {
+    name: "Liège, Belgique",
+    longitude: 5.5736112,
+    latitude: 50.6450944,
+    altitude: 0.035
+  },
+  {
+    name: "Graz, Autriche",
+    longitude: 15.4382786,
+    latitude: 47.0708678,
+    altitude: 0.035
+  },
+  {
+    name: "Linz, Autriche",
+    longitude: 14.286198,
+    latitude: 48.3059078,
+    altitude: 0.035
+  },
+  {
+    name: "Salzbourg, Autriche",
+    longitude: 13.0464806,
+    latitude: 47.7981346,
+    altitude: 0.035
+  },
+  {
+    name: "Innsbruck, Autriche",
+    longitude: 11.3927685,
+    latitude: 47.2654296,
+    altitude: 0.035
+  },
+  {
+    name: "Porto, Portugal",
+    longitude: -8.6103497,
+    latitude: 41.1502195,
+    altitude: 0.035
+  },
+  {
+    name: "Coimbra, Portugal",
+    longitude: -8.4294632,
+    latitude: 40.2111931,
+    altitude: 0.035
+  },
+  {
+    name: "Braga, Portugal",
+    longitude: -8.4280045,
+    latitude: 41.5510583,
+    altitude: 0.035
+  },
+  {
+    name: "Thessalonique, Grèce",
+    longitude: 22.9352716,
+    latitude: 40.6403167,
+    altitude: 0.035
+  },
+  {
+    name: "Patras, Grèce",
+    longitude: 21.7350847,
+    latitude: 38.246242,
+    altitude: 0.035
+  },
+  {
+    name: "Larissa, Grèce",
+    longitude: 22.4160706,
+    latitude: 39.6383092,
+    altitude: 0.035
+  },
+  {
+    name: "Heraklion, Grèce",
+    longitude: 25.1332843,
+    latitude: 35.33908,
+    altitude: 0.035
+  },
+  {
+    name: "Cluj-Napoca, Roumanie",
+    longitude: 23.5899542,
+    latitude: 46.769379,
+    altitude: 0.035
+  },
+  {
+    name: "Timișoara, Roumanie",
+    longitude: 21.2257474,
+    latitude: 45.7538355,
+    altitude: 0.035
+  },
+  {
+    name: "Iași, Roumanie",
+    longitude: 27.5837814,
+    latitude: 47.1615598,
+    altitude: 0.035
+  },
+  {
+    name: "Constanța, Roumanie",
+    longitude: 28.6507598,
+    latitude: 44.1767161,
+    altitude: 0.035
+  },
+  {
+    name: "Plovdiv, Bulgarie",
+    longitude: 24.7499297,
+    latitude: 42.1418541,
+    altitude: 0.035
+  },
+  {
+    name: "Varna, Bulgarie",
+    longitude: 27.9166653,
+    latitude: 43.2073873,
+    altitude: 0.035
+  },
+  {
+    name: "Bourgas, Bulgarie",
+    longitude: 27.4721276,
+    latitude: 42.4936616,
+    altitude: 0.035
+  },
+  {
+    name: "Split, Croatie",
+    longitude: 16.4399659,
+    latitude: 43.5116383,
+    altitude: 0.035
+  },
+  {
+    name: "Rijeka, Croatie",
+    longitude: 14.442208,
+    latitude: 45.3267976,
+    altitude: 0.035
+  },
+  {
+    name: "Osijek, Croatie",
+    longitude: 18.6953685,
+    latitude: 45.5548793,
+    altitude: 0.035
+  },
+  {
+    name: "Maribor, Slovénie",
+    longitude: 15.6455854,
+    latitude: 46.5576439,
+    altitude: 0.035
+  },
+  {
+    name: "Celje, Slovénie",
+    longitude: 15.2616828,
+    latitude: 46.2293889,
+    altitude: 0.035
+  },
+  {
+    name: "Kranj, Slovénie",
+    longitude: 14.3549353,
+    latitude: 46.2432913,
+    altitude: 0.035
+  },
+  {
+    name: "Košice, Slovaquie",
+    longitude: 21.2496774,
+    latitude: 48.7172272,
+    altitude: 0.035
+  },
+  {
+    name: "Žilina, Slovaquie",
+    longitude: 18.7393139,
+    latitude: 49.2234674,
+    altitude: 0.035
+  },
+  {
+    name: "Nitra, Slovaquie",
+    longitude: 18.0894593,
+    latitude: 48.31295,
+    altitude: 0.035
+  },
+  {
+    name: "Tartu, Estonie",
+    longitude: 26.72245,
+    latitude: 58.3801207,
+    altitude: 0.035
+  },
+  {
+    name: "Narva, Estonie",
+    longitude: 28.1402278,
+    latitude: 59.3578938,
+    altitude: 0.035
+  },
+  {
+    name: "Pärnu, Estonie",
+    longitude: 24.5081751,
+    latitude: 58.3835136,
+    altitude: 0.035
+  },
+  {
+    name: "Daugavpils, Lettonie",
+    longitude: 26.5159337,
+    latitude: 55.8712267,
+    altitude: 0.035
+  },
+  {
+    name: "Liepāja, Lettonie",
+    longitude: 21.0070903,
+    latitude: 56.5048435,
+    altitude: 0.035
+  },
+  {
+    name: "Jelgava, Lettonie",
+    longitude: 23.7339143,
+    latitude: 56.6514394,
+    altitude: 0.035
+  },
+  {
+    name: "Kaunas, Lituanie",
+    longitude: 23.9044817,
+    latitude: 54.8982139,
+    altitude: 0.035
+  },
+  {
+    name: "Klaipėda, Lituanie",
+    longitude: 21.1350469,
+    latitude: 55.7127529,
+    altitude: 0.035
+  },
+  {
+    name: "Šiauliai, Lituanie",
+    longitude: 23.3157775,
+    latitude: 55.9340823,
+    altitude: 0.035
+  },
+  {
+    name: "Zurich, Suisse",
+    longitude: 8.5410422,
+    latitude: 47.3744489,
+    altitude: 0.035
+  },
+  {
+    name: "Genève, Suisse",
+    longitude: 6.1466014,
+    latitude: 46.2017559,
+    altitude: 0.035
+  },
+  {
+    name: "Bâle, Suisse",
+    longitude: 7.5878261,
+    latitude: 47.5581077,
+    altitude: 0.035
+  },
+  {
+    name: "Berne, Suisse",
+    longitude: 7.4521749,
+    latitude: 46.9484742,
+    altitude: 0.035
+  },
+  {
+    name: "Lausanne, Suisse",
+    longitude: 6.6327025,
+    latitude: 46.5218269,
+    altitude: 0.035
+  },
+  {
+    name: "Winterthour, Suisse",
+    longitude: 8.7291498,
+    latitude: 47.4991723,
+    altitude: 0.035
+  },
+  {
+    name: "Saint-Gall, Suisse",
+    longitude: 9.3762397,
+    latitude: 47.425618,
+    altitude: 0.035
+  },
+  {
+    name: "Lucerne, Suisse",
+    longitude: 8.3054682,
+    latitude: 47.0505452,
+    altitude: 0.035
+  },
+  {
+    name: "Lugano, Suisse",
+    longitude: 8.9520281,
+    latitude: 46.0050102,
+    altitude: 0.035
+  },
+  {
+    name: "Bienne, Suisse",
+    longitude: 7.2439029,
+    latitude: 47.1402077,
+    altitude: 0.035
+  },
+  {
+    name: "Montréal, Canada",
+    longitude: -73.5698065,
+    latitude: 45.5031824,
+    altitude: 0.035
+  },
+  {
+    name: "Québec, Canada",
+    longitude: -71.8258668,
+    latitude: 52.4760892,
+    altitude: 0.035
+  },
+  {
+    name: "Ottawa, Canada",
+    longitude: -75.6901106,
+    latitude: 45.4208777,
+    altitude: 0.035
+  },
+  {
+    name: "Toronto, Canada",
+    longitude: -79.3839347,
+    latitude: 43.6534817,
+    altitude: 0.035
+  },
+  {
+    name: "Vancouver, Canada",
+    longitude: -123.113952,
+    latitude: 49.2608724,
+    altitude: 0.035
+  },
+  {
+    name: "Calgary, Canada",
+    longitude: -114.057541,
+    latitude: 51.0456064,
+    altitude: 0.035
+  },
+  {
+    name: "Edmonton, Canada",
+    longitude: -113.491241,
+    latitude: 53.5462055,
+    altitude: 0.035
+  },
+  {
+    name: "Winnipeg, Canada",
+    longitude: -97.1384584,
+    latitude: 49.8955367,
+    altitude: 0.035
+  },
+  {
+    name: "Halifax, Canada",
+    longitude: -63.5859487,
+    latitude: 44.648618,
+    altitude: 0.035
+  },
+  {
+    name: "Bruxelles, Belgique",
+    longitude: 4.351697,
+    latitude: 50.8465573,
+    altitude: 0.035
+  },
+  {
+    name: "Anvers, Belgique",
+    longitude: 4.3997081,
+    latitude: 51.2211097,
+    altitude: 0.035
+  },
+  {
+    name: "Gand, Belgique",
+    longitude: 3.7250121,
+    latitude: 51.0538286,
+    altitude: 0.035
+  },
+  {
+    name: "Charleroi, Belgique",
+    longitude: 4.444528,
+    latitude: 50.4116233,
+    altitude: 0.035
+  },
+  {
+    name: "Liège, Belgique",
+    longitude: 5.5736112,
+    latitude: 50.6450944,
+    altitude: 0.035
+  },
+  {
+    name: "Bruges, Belgique",
+    longitude: 3.226772,
+    latitude: 51.2085526,
+    altitude: 0.035
+  },
+  {
+    name: "Namur, Belgique",
+    longitude: 4.8661892,
+    latitude: 50.4665284,
+    altitude: 0.035
+  },
+  {
+    name: "Mons, Belgique",
+    longitude: 3.951958,
+    latitude: 50.4549568,
+    altitude: 0.035
+  },
+  {
+    name: "Louvain, Belgique",
+    longitude: 4.7011675,
+    latitude: 50.879202,
+    altitude: 0.035
+  },
+  {
+    name: "Tournai, Belgique",
+    longitude: 3.3878179,
+    latitude: 50.6056458,
+    altitude: 0.035
+  },
+  {
+    name: "Luxembourg, Luxembourg",
+    longitude: 6.1296751,
+    latitude: 49.8158683,
+    altitude: 0.035
+  },
+  {
+    name: "Esch-sur-Alzette, Luxembourg",
+    longitude: 5.9850306,
+    latitude: 49.4959628,
+    altitude: 0.035
+  },
+  {
+    name: "Differdange, Luxembourg",
+    longitude: 5.889242,
+    latitude: 49.5208469,
+    altitude: 0.035
+  },
+  {
+    name: "Dudelange, Luxembourg",
+    longitude: 6.0847792,
+    latitude: 49.4786477,
+    altitude: 0.035
+  },
+  {
+    name: "Ettelbruck, Luxembourg",
+    longitude: 6.0984659,
+    latitude: 49.8470016,
+    altitude: 0.035
+  },
+  {
+    name: "Diekirch, Luxembourg",
+    longitude: 6.1600549,
+    latitude: 49.8690898,
+    altitude: 0.035
+  },
+  {
+    name: "Wiltz, Luxembourg",
+    longitude: 5.9321021,
+    latitude: 49.9666914,
+    altitude: 0.035
+  },
+  {
+    name: "Grevenmacher, Luxembourg",
+    longitude: 6.4430979,
+    latitude: 49.679313,
+    altitude: 0.035
+  },
+  {
+    name: "Remich, Luxembourg",
+    longitude: 6.3676062,
+    latitude: 49.5442267,
+    altitude: 0.035
+  },
+  {
+    name: "Vianden, Luxembourg",
+    longitude: 6.2066715,
+    latitude: 49.9336976,
+    altitude: 0.035
+  }
 ];
 
 // Fonction utilitaire pour filtrer les villes
-export const filterCities = (query: string): string[] => {
+export const filterCities = (query: string): CityData[] => {
   if (!query.trim()) return [];
   
   const lowerQuery = query.toLowerCase();
   return cities
-    .filter(city => city.toLowerCase().includes(lowerQuery))
+    .filter(city => city.name.toLowerCase().includes(lowerQuery))
     .slice(0, 10); // Limiter à 10 résultats
+};
+
+// Fonction pour récupérer les coordonnées d'une ville
+export const getCityCoordinates = (cityName: string): CityData | null => {
+  return cities.find(city => city.name === cityName) || null;
 };
