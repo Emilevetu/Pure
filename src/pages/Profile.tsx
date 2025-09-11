@@ -16,7 +16,10 @@ import {
   Zap,
   Heart,
   Users,
-  Target
+  Target,
+  Sun,
+  Moon,
+  Orbit
 } from 'lucide-react';
 import { ProfileService, UserProfile } from '../lib/profile-service';
 
@@ -74,6 +77,41 @@ const Profile: React.FC = () => {
       .join('')
       .toUpperCase()
       .slice(0, 2);
+  };
+
+  // Helper pour obtenir l'icône de chaque planète
+  const getPlanetIcon = (planetName: string) => {
+    const icons: { [key: string]: React.ElementType } = {
+      'soleil': Sun,
+      'sun': Sun,
+      'lune': Moon,
+      'moon': Moon,
+      'mercure': Orbit,
+      'mercury': Orbit,
+      'vénus': Heart,
+      'venus': Heart,
+      'mars': Target,
+      'jupiter': Star,
+      'saturne': Orbit,
+      'saturn': Orbit
+    };
+    
+    return icons[planetName.toLowerCase()] || Star;
+  };
+
+  // Helper pour obtenir le nom français des planètes
+  const getPlanetDisplayName = (planetKey: string) => {
+    const names: { [key: string]: string } = {
+      'sun': 'Soleil',
+      'moon': 'Lune', 
+      'mercury': 'Mercure',
+      'venus': 'Vénus',
+      'mars': 'Mars',
+      'jupiter': 'Jupiter',
+      'saturn': 'Saturne'
+    };
+    
+    return names[planetKey] || planetKey;
   };
 
   return (
@@ -202,16 +240,58 @@ const Profile: React.FC = () => {
                     </div>
                   )}
 
-                  {/* Planètes principales */}
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                    {userProfile.astro_data.planets?.slice(0, 6).map((planet) => (
-                      <div key={planet.planetId} className="text-center p-3 bg-muted/30 rounded-lg">
-                        <p className="text-xs text-muted-foreground mb-1">{planet.planet}</p>
-                        <p className="text-sm font-medium">{planet.longitude.toFixed(2)}°</p>
-                        <p className="text-xs text-muted-foreground">{planet.distance.toFixed(2)} AU</p>
-                      </div>
-                    ))}
-                  </div>
+                   {/* Planètes principales */}
+                   <div>
+                     <h4 className="text-sm font-medium text-muted-foreground mb-3">Planètes principales</h4>
+                     <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                       {/* Soleil - priorité 1 */}
+                       {userProfile.astro_data.sun && (
+                         <div className="flex items-center space-x-3 p-3 bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg border border-amber-200">
+                           <Sun className="h-5 w-5 text-amber-600 flex-shrink-0" />
+                           <div>
+                             <p className="font-semibold text-amber-800 text-sm">Soleil</p>
+                             <p className="text-xs text-amber-700">
+                               {userProfile.astro_data.sun.sign} • {userProfile.astro_data.sun.house}
+                             </p>
+                           </div>
+                         </div>
+                       )}
+                       
+                       {/* Lune - priorité 2 */}
+                       {userProfile.astro_data.moon && (
+                         <div className="flex items-center space-x-3 p-3 bg-gradient-to-r from-slate-50 to-blue-50 rounded-lg border border-slate-200">
+                           <Moon className="h-5 w-5 text-slate-600 flex-shrink-0" />
+                           <div>
+                             <p className="font-semibold text-slate-800 text-sm">Lune</p>
+                             <p className="text-xs text-slate-700">
+                               {userProfile.astro_data.moon.sign} • {userProfile.astro_data.moon.house}
+                             </p>
+                           </div>
+                         </div>
+                       )}
+                       
+                       {/* Autres planètes principales */}
+                       {['mercury', 'venus', 'mars', 'jupiter'].map((planetKey) => {
+                         const planetData = userProfile.astro_data[planetKey as keyof typeof userProfile.astro_data];
+                         if (!planetData || typeof planetData !== 'object' || !('sign' in planetData)) return null;
+                         
+                         const IconComponent = getPlanetIcon(planetKey);
+                         const displayName = getPlanetDisplayName(planetKey);
+                         
+                         return (
+                           <div key={planetKey} className="flex items-center space-x-3 p-3 bg-muted/30 rounded-lg">
+                             <IconComponent className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                             <div>
+                               <p className="font-medium text-sm">{displayName}</p>
+                               <p className="text-xs text-muted-foreground">
+                                 {planetData.sign} • {planetData.house}
+                               </p>
+                             </div>
+                           </div>
+                         );
+                       })}
+                     </div>
+                   </div>
                   
                   <div className="pt-4">
                     <Button 
