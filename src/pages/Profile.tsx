@@ -61,6 +61,13 @@ const Profile: React.FC = () => {
       console.log('📖 [Profile] Chargement du profil utilisateur pour ID:', user.id);
       const profile = await ProfileService.getUserProfile(user.id);
       console.log('📋 [Profile] Profil récupéré depuis la base:', profile);
+      console.log('🔍 [Profile] Vérification astro_data:', profile?.astro_data);
+      console.log('🔍 [Profile] Type de astro_data:', typeof profile?.astro_data);
+      if (profile?.astro_data) {
+        console.log('🌟 [Profile] Contenu astro_data.sun:', profile.astro_data.sun);
+        console.log('🌙 [Profile] Contenu astro_data.moon:', profile.astro_data.moon);
+        console.log('🏠 [Profile] Contenu astro_data.houseSystem:', profile.astro_data.houseSystem);
+      }
       setUserProfile(profile);
       console.log('✅ [Profile] État du profil mis à jour:', profile);
     } catch (error) {
