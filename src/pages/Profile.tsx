@@ -52,13 +52,17 @@ const Profile: React.FC = () => {
   };
 
   const loadUserProfile = async () => {
-    if (!user?.id) return;
+    if (!user?.id) {
+      console.log('❌ [Profile] Pas d\'ID utilisateur disponible');
+      return;
+    }
     
     try {
-      console.log('📖 [Profile] Chargement du profil utilisateur...');
+      console.log('📖 [Profile] Chargement du profil utilisateur pour ID:', user.id);
       const profile = await ProfileService.getUserProfile(user.id);
+      console.log('📋 [Profile] Profil récupéré depuis la base:', profile);
       setUserProfile(profile);
-      console.log('✅ [Profile] Profil chargé:', profile);
+      console.log('✅ [Profile] État du profil mis à jour:', profile);
     } catch (error) {
       console.error('❌ [Profile] Erreur lors du chargement du profil:', error);
     } finally {
@@ -136,7 +140,18 @@ const Profile: React.FC = () => {
             </div>
 
             {/* Données d'onboarding */}
-            {userProfile && (
+            {profileLoading ? (
+              <Card>
+                <CardContent className="p-8 text-center">
+                  <div className="flex items-center justify-center space-x-2">
+                    <div className="w-4 h-4 bg-primary rounded-full animate-bounce"></div>
+                    <div className="w-4 h-4 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                    <div className="w-4 h-4 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                  </div>
+                  <p className="mt-4 text-muted-foreground">Chargement de votre profil...</p>
+                </CardContent>
+              </Card>
+            ) : userProfile ? (
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center space-x-2">
@@ -205,9 +220,15 @@ const Profile: React.FC = () => {
                       </div>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
-            )}
+                 </CardContent>
+               </Card>
+             ) : (
+               <Card>
+                 <CardContent className="p-8 text-center">
+                   <p className="text-muted-foreground">Aucune donnée de profil trouvée. Veuillez compléter votre onboarding.</p>
+                 </CardContent>
+               </Card>
+             )}
 
             {/* Thème astral */}
             {userProfile?.astro_data && (
