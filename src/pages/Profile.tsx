@@ -274,13 +274,15 @@ const Profile: React.FC = () => {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {!userProfile.astro_data ? (
-                    <div className="space-y-4">
+                    <div className="space-y-4 text-center">
+                      <div className="flex items-center justify-center space-x-2">
+                        <div className="w-3 h-3 bg-primary rounded-full animate-bounce"></div>
+                        <div className="w-3 h-3 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                        <div className="w-3 h-3 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                      </div>
                       <p className="text-sm text-muted-foreground">
-                        Aucun thème n'a encore été calculé pour votre profil.
+                        Calcul en cours… Votre thème est en cours de calcul et apparaîtra bientôt.
                       </p>
-                      <Button onClick={handleCalculateAstro} disabled={astroLoading} className="w-full">
-                        {astroLoading ? 'Calcul en cours…' : 'Calculer mon thème astral'}
-                      </Button>
                     </div>
                   ) : (
                     <>

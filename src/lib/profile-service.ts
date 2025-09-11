@@ -24,20 +24,27 @@ export class ProfileService {
     try {
       console.log('💾 [ProfileService] Sauvegarde du profil utilisateur...', profileData);
       
+      // Construire le payload en excluant les champs undefined pour éviter d'écraser astro_data
+      const payload: any = {
+        user_id: profileData.user_id,
+        birth_date: profileData.birth_date,
+        birth_place: profileData.birth_place,
+        birth_time: profileData.birth_time,
+        energy_time: profileData.energy_time,
+        resource: profileData.resource,
+        group_role: profileData.group_role,
+        priority: profileData.priority,
+        updated_at: new Date().toISOString()
+      };
+
+      // N'ajouter astro_data que s'il est fourni pour ne pas le remettre à null
+      if (typeof profileData.astro_data !== 'undefined') {
+        payload.astro_data = profileData.astro_data;
+      }
+
       const { data, error } = await (supabase as any)
         .from('user_profiles')
-        .upsert({
-          user_id: profileData.user_id,
-          birth_date: profileData.birth_date,
-          birth_place: profileData.birth_place,
-          birth_time: profileData.birth_time,
-          energy_time: profileData.energy_time,
-          resource: profileData.resource,
-          group_role: profileData.group_role,
-          priority: profileData.priority,
-          astro_data: profileData.astro_data,
-          updated_at: new Date().toISOString()
-        }, {
+        .upsert(payload, {
           onConflict: 'user_id'
         })
         .select()
