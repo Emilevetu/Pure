@@ -22,6 +22,7 @@ import {
   Orbit
 } from 'lucide-react';
 import { ProfileService, UserProfile } from '../lib/profile-service';
+import { fetchAstroData } from '@/lib/astro';
 
 const Profile: React.FC = () => {
   const navigate = useNavigate();
@@ -30,6 +31,7 @@ const Profile: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [profileLoading, setProfileLoading] = useState(true);
+  const [astroLoading, setAstroLoading] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -123,6 +125,27 @@ const Profile: React.FC = () => {
     };
     
     return names[planetKey] || planetKey;
+  };
+
+  // Action: calculer et enregistrer le thème astral
+  const handleCalculateAstro = async () => {
+    if (!user || !userProfile) return;
+    try {
+      setAstroLoading(true);
+      console.log('🧮 [Profile] Calcul du thème astral...');
+      const astro = await fetchAstroData({
+        date: userProfile.birth_date,
+        time: userProfile.birth_time,
+        place: userProfile.birth_place,
+      });
+      await ProfileService.updateAstroData(user.id, astro);
+      setUserProfile((prev) => (prev ? { ...prev, astro_data: astro } : prev));
+      console.log('✅ [Profile] Thème astral calculé et sauvegardé');
+    } catch (error) {
+      console.error('❌ [Profile] Erreur lors du calcul du thème:', error);
+    } finally {
+      setAstroLoading(false);
+    }
   };
 
   return (
@@ -238,7 +261,7 @@ const Profile: React.FC = () => {
              )}
 
             {/* Thème astral */}
-            {userProfile?.astro_data && (
+            {userProfile && (
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center space-x-2">
@@ -250,88 +273,101 @@ const Profile: React.FC = () => {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {/* Ascendant et MC */}
-                  {userProfile.astro_data.houseSystem && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                      <div className="text-center p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg border border-blue-200">
-                        <p className="text-sm text-blue-600 font-medium mb-1">Ascendant</p>
-                        <p className="text-lg font-bold text-blue-800">
-                          {userProfile.astro_data.houseSystem.ascendant.sign} {userProfile.astro_data.houseSystem.ascendant.degrees}°{userProfile.astro_data.houseSystem.ascendant.minutes}'
-                        </p>
-                      </div>
-                      <div className="text-center p-4 bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg border border-purple-200">
-                        <p className="text-sm text-purple-600 font-medium mb-1">Milieu du Ciel</p>
-                        <p className="text-lg font-bold text-purple-800">
-                          {userProfile.astro_data.houseSystem.mc.sign} {userProfile.astro_data.houseSystem.mc.degrees}°{userProfile.astro_data.houseSystem.mc.minutes}'
-                        </p>
-                      </div>
+                  {!userProfile.astro_data ? (
+                    <div className="space-y-4">
+                      <p className="text-sm text-muted-foreground">
+                        Aucun thème n'a encore été calculé pour votre profil.
+                      </p>
+                      <Button onClick={handleCalculateAstro} disabled={astroLoading} className="w-full">
+                        {astroLoading ? 'Calcul en cours…' : 'Calculer mon thème astral'}
+                      </Button>
                     </div>
-                  )}
+                  ) : (
+                    <>
+                      {/* Ascendant et MC */}
+                      {userProfile.astro_data.houseSystem && (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                          <div className="text-center p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg border border-blue-200">
+                            <p className="text-sm text-blue-600 font-medium mb-1">Ascendant</p>
+                            <p className="text-lg font-bold text-blue-800">
+                              {userProfile.astro_data.houseSystem.ascendant.sign} {userProfile.astro_data.houseSystem.ascendant.degrees}°{userProfile.astro_data.houseSystem.ascendant.minutes}'
+                            </p>
+                          </div>
+                          <div className="text-center p-4 bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg border border-purple-200">
+                            <p className="text-sm text-purple-600 font-medium mb-1">Milieu du Ciel</p>
+                            <p className="text-lg font-bold text-purple-800">
+                              {userProfile.astro_data.houseSystem.mc.sign} {userProfile.astro_data.houseSystem.mc.degrees}°{userProfile.astro_data.houseSystem.mc.minutes}'
+                            </p>
+                          </div>
+                        </div>
+                      )}
 
-                   {/* Planètes principales */}
-                   <div>
-                     <h4 className="text-sm font-medium text-muted-foreground mb-3">Planètes principales</h4>
-                     <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                       {/* Soleil - priorité 1 */}
-                       {userProfile.astro_data.sun && (
-                         <div className="flex items-center space-x-3 p-3 bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg border border-amber-200">
-                           <Sun className="h-5 w-5 text-amber-600 flex-shrink-0" />
-                           <div>
-                             <p className="font-semibold text-amber-800 text-sm">Soleil</p>
-                             <p className="text-xs text-amber-700">
-                               {userProfile.astro_data.sun.sign} • {userProfile.astro_data.sun.house}
-                             </p>
-                           </div>
-                         </div>
-                       )}
-                       
-                       {/* Lune - priorité 2 */}
-                       {userProfile.astro_data.moon && (
-                         <div className="flex items-center space-x-3 p-3 bg-gradient-to-r from-slate-50 to-blue-50 rounded-lg border border-slate-200">
-                           <Moon className="h-5 w-5 text-slate-600 flex-shrink-0" />
-                           <div>
-                             <p className="font-semibold text-slate-800 text-sm">Lune</p>
-                             <p className="text-xs text-slate-700">
-                               {userProfile.astro_data.moon.sign} • {userProfile.astro_data.moon.house}
-                             </p>
-                           </div>
-                         </div>
-                       )}
-                       
-                       {/* Autres planètes principales */}
-                       {['mercury', 'venus', 'mars', 'jupiter'].map((planetKey) => {
-                         const planetData = userProfile.astro_data[planetKey as keyof typeof userProfile.astro_data];
-                         if (!planetData || typeof planetData !== 'object' || !('sign' in planetData)) return null;
-                         
-                         const IconComponent = getPlanetIcon(planetKey);
-                         const displayName = getPlanetDisplayName(planetKey);
-                         
-                         return (
-                           <div key={planetKey} className="flex items-center space-x-3 p-3 bg-muted/30 rounded-lg">
-                             <IconComponent className="h-5 w-5 text-muted-foreground flex-shrink-0" />
-                             <div>
-                               <p className="font-medium text-sm">{displayName}</p>
-                               <p className="text-xs text-muted-foreground">
-                                 {planetData.sign} • {planetData.house}
-                               </p>
-                             </div>
-                           </div>
-                         );
-                       })}
-                     </div>
-                   </div>
-                  
-                  <div className="pt-4">
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="w-full"
-                      onClick={() => navigate('/charts')}
-                    >
-                      <Star className="mr-2 h-4 w-4" />
-                      Voir le thème complet
-                    </Button>
-                  </div>
+                      {/* Planètes principales */}
+                      <div>
+                        <h4 className="text-sm font-medium text-muted-foreground mb-3">Planètes principales</h4>
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                          {/* Soleil - priorité 1 */}
+                          {userProfile.astro_data.sun && (
+                            <div className="flex items-center space-x-3 p-3 bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg border border-amber-200">
+                              <Sun className="h-5 w-5 text-amber-600 flex-shrink-0" />
+                              <div>
+                                <p className="font-semibold text-amber-800 text-sm">Soleil</p>
+                                <p className="text-xs text-amber-700">
+                                  {userProfile.astro_data.sun.sign} • {userProfile.astro_data.sun.house}
+                                </p>
+                              </div>
+                            </div>
+                          )}
+                          
+                          {/* Lune - priorité 2 */}
+                          {userProfile.astro_data.moon && (
+                            <div className="flex items-center space-x-3 p-3 bg-gradient-to-r from-slate-50 to-blue-50 rounded-lg border border-slate-200">
+                              <Moon className="h-5 w-5 text-slate-600 flex-shrink-0" />
+                              <div>
+                                <p className="font-semibold text-slate-800 text-sm">Lune</p>
+                                <p className="text-xs text-slate-700">
+                                  {userProfile.astro_data.moon.sign} • {userProfile.astro_data.moon.house}
+                                </p>
+                              </div>
+                            </div>
+                          )}
+                          
+                          {/* Autres planètes principales */}
+                          {['mercury', 'venus', 'mars', 'jupiter'].map((planetKey) => {
+                            const planetData = userProfile.astro_data[planetKey as keyof typeof userProfile.astro_data];
+                            if (!planetData || typeof planetData !== 'object' || !('sign' in planetData)) return null;
+                            
+                            const IconComponent = getPlanetIcon(planetKey);
+                            const displayName = getPlanetDisplayName(planetKey);
+                            
+                            return (
+                              <div key={planetKey} className="flex items-center space-x-3 p-3 bg-muted/30 rounded-lg">
+                                <IconComponent className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                                <div>
+                                  <p className="font-medium text-sm">{displayName}</p>
+                                  <p className="text-xs text-muted-foreground">
+                                    {planetData.sign} • {planetData.house}
+                                  </p>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      <div className="pt-4">
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="w-full"
+                          onClick={() => navigate('/charts')}
+                        >
+                          <Star className="mr-2 h-4 w-4" />
+                          Voir le thème complet
+                        </Button>
+                      </div>
+                    </>
+                  )}
                 </CardContent>
               </Card>
             )}
