@@ -24,7 +24,7 @@ interface JPLHorizonsResponse {
 }
 
 export class JPLHorizonsService {
-  private static readonly BASE_URL = '/api/jpl-horizons.api';
+  private static readonly BASE_URL = 'https://oytxonaumefjsnkpzbxy.supabase.co/functions/v1/jpl-horizons-proxy';
   private static readonly TIMEOUT = 30000; // 30 secondes
 
   // IDs des planètes dans JPL Horizons
