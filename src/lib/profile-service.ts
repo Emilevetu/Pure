@@ -24,7 +24,7 @@ export class ProfileService {
     try {
       console.log('💾 [ProfileService] Sauvegarde du profil utilisateur...', profileData);
       
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('user_profiles')
         .upsert({
           user_id: profileData.user_id,
@@ -63,7 +63,7 @@ export class ProfileService {
     try {
       console.log('🔮 [ProfileService] Mise à jour des données astrologiques...', userId);
       
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('user_profiles')
         .update({
           astro_data: astroData,
@@ -90,11 +90,11 @@ export class ProfileService {
     try {
       console.log('📖 [ProfileService] Récupération du profil utilisateur...', userId);
       
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('user_profiles')
         .select('*')
         .eq('user_id', userId)
-        .single();
+        .maybeSingle();
 
       if (error) {
         if (error.code === 'PGRST116') {
@@ -120,7 +120,7 @@ export class ProfileService {
     try {
       console.log('🗑️ [ProfileService] Suppression du profil utilisateur...', userId);
       
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('user_profiles')
         .delete()
         .eq('user_id', userId);

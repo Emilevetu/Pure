@@ -10,7 +10,7 @@ interface BirthData {
   place: string;
 }
 
-interface AstroData {
+export interface AstroData {
   sun: PlanetPosition;
   moon: PlanetPosition;
   mercury: PlanetPosition;

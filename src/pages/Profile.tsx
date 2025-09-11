@@ -207,8 +207,8 @@ const Profile: React.FC = () => {
                     {userProfile.astro_data.planets?.slice(0, 6).map((planet) => (
                       <div key={planet.planetId} className="text-center p-3 bg-muted/30 rounded-lg">
                         <p className="text-xs text-muted-foreground mb-1">{planet.planet}</p>
-                        <p className="text-sm font-medium">{planet.sign}</p>
-                        <p className="text-xs text-muted-foreground">{planet.house}</p>
+                        <p className="text-sm font-medium">{planet.longitude.toFixed(2)}°</p>
+                        <p className="text-xs text-muted-foreground">{planet.distance.toFixed(2)} AU</p>
                       </div>
                     ))}
                   </div>

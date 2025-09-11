@@ -184,6 +184,51 @@ export type Database = {
         }
         Relationships: []
       }
+      user_profiles: {
+        Row: {
+          astro_data: Json | null
+          birth_date: string
+          birth_place: string
+          birth_time: string
+          created_at: string
+          energy_time: string
+          group_role: string
+          id: string
+          priority: string
+          resource: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          astro_data?: Json | null
+          birth_date: string
+          birth_place: string
+          birth_time: string
+          created_at?: string
+          energy_time: string
+          group_role: string
+          id?: string
+          priority: string
+          resource: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          astro_data?: Json | null
+          birth_date?: string
+          birth_place?: string
+          birth_time?: string
+          created_at?: string
+          energy_time?: string
+          group_role?: string
+          id?: string
+          priority?: string
+          resource?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_recommendations: {
         Row: {
           content: string | null
