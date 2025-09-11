@@ -75,7 +75,7 @@ const AutocompleteDark: React.FC<AutocompleteDarkProps> = ({
     onChange(option);
     setIsOpen(false);
     setHighlightedIndex(-1);
-    inputRef.current?.focus();
+    inputRef.current?.blur(); // Perdre le focus au lieu de le garder
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {

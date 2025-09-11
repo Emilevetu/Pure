@@ -11,6 +11,8 @@ interface OnboardingData {
   firstName: string;
   lastName: string;
   email: string;
+  groupRole: string;
+  priority: string;
 }
 
 const Onboarding = () => {
@@ -22,11 +24,13 @@ const Onboarding = () => {
     birthTime: '',
     firstName: '',
     lastName: '',
-    email: ''
+    email: '',
+    groupRole: '',
+    priority: ''
   });
   const [isPopupOpen, setIsPopupOpen] = useState(false);
 
-  const totalSteps = 7;
+  const totalSteps = 8;
 
   // Empêcher le scroll sur la page
   useEffect(() => {
@@ -78,8 +82,9 @@ const Onboarding = () => {
       case 3: return data.birthTime !== '';
       case 4: return data.firstName !== '';
       case 5: return data.lastName !== '';
-      case 6: return data.email !== '' && data.email.includes('@');
-      case 7: return true;
+      case 6: return data.groupRole !== '';
+      case 7: return data.priority !== '' && ['liberte', 'securite', 'apprentissage', 'sens', 'reconnaissance'].includes(data.priority);
+      case 8: return true;
       default: return false;
     }
   };
@@ -139,10 +144,10 @@ const Onboarding = () => {
                 onClick={() => setIsPopupOpen(true)}
                 className="w-full max-w-xs mx-auto py-3 px-4 rounded-lg text-sm font-medium transition-colors border border-gray-600 text-gray-300 hover:bg-gray-800 hover:border-gray-500 hover:text-white focus:outline-none focus:text-gray-300 focus:border-gray-600"
               >
-                {data.birthTime === 'night' && 'La nuit - entre minuit et 8h'}
-                {data.birthTime === 'day' && 'La journée - entre 8h et 16h'}
-                {data.birthTime === 'evening' && 'La soirée - entre 16h et minuit'}
-                {data.birthTime === 'unknown' && 'Je ne sais pas'}
+                {data.birthTime === 'environ 04:00' && 'La nuit - entre minuit et 8h'}
+                {data.birthTime === 'environ 12:00' && 'La journée - entre 8h et 16h'}
+                {data.birthTime === 'environ 20:00' && 'La soirée - entre 16h et minuit'}
+                {data.birthTime === 'par défaut 12:00' && 'Je ne sais pas'}
                 {!data.birthTime && 'Je ne connais pas l\'heure exacte'}
               </button>
             </div>
@@ -218,15 +223,64 @@ const Onboarding = () => {
         return (
           <div className="text-left px-6">
             <h1 className="text-2xl md:text-3xl font-light text-white mb-16 leading-tight">
-              Quel est votre <span className="text-gray-300">nom de famille ?</span>
+              Qu'est-ce qui vous <span className="text-gray-300">ressource le plus ?</span>
             </h1>
-            <input
-              type="text"
-              placeholder="Votre nom"
-              value={data.lastName}
-              onChange={(e) => handleInputChange('lastName', e.target.value)}
-              className="w-full max-w-xs mx-auto bg-transparent border-0 border-b-2 border-gray-600 rounded-none px-0 py-4 text-white text-center text-xl focus:outline-none focus:border-white transition-colors placeholder-gray-500"
-            />
+            <div className="space-y-2">
+              <button
+                onClick={() => handleInputChange('lastName', 'alone')}
+                className={`w-full max-w-xs mx-auto py-2 px-4 rounded-lg text-sm font-light transition-all duration-200 border ${
+                  data.lastName === 'alone' 
+                    ? 'border-white text-white bg-white/10' 
+                    : 'border-gray-600 text-gray-300 hover:bg-gray-800/50 hover:border-gray-500 hover:text-white'
+                } focus:outline-none`}
+              >
+                Des moments seul(e)
+              </button>
+              
+              <button
+                onClick={() => handleInputChange('lastName', 'family')}
+                className={`w-full max-w-xs mx-auto py-2 px-4 rounded-lg text-sm font-light transition-all duration-200 border ${
+                  data.lastName === 'family' 
+                    ? 'border-white text-white bg-white/10' 
+                    : 'border-gray-600 text-gray-300 hover:bg-gray-800/50 hover:border-gray-500 hover:text-white'
+                } focus:outline-none`}
+              >
+                Avec vos proches
+              </button>
+              
+              <button
+                onClick={() => handleInputChange('lastName', 'nature')}
+                className={`w-full max-w-xs mx-auto py-2 px-4 rounded-lg text-sm font-light transition-all duration-200 border ${
+                  data.lastName === 'nature' 
+                    ? 'border-white text-white bg-white/10' 
+                    : 'border-gray-600 text-gray-300 hover:bg-gray-800/50 hover:border-gray-500 hover:text-white'
+                } focus:outline-none`}
+              >
+                Le contact avec la nature
+              </button>
+              
+              <button
+                onClick={() => handleInputChange('lastName', 'movement')}
+                className={`w-full max-w-xs mx-auto py-2 px-4 rounded-lg text-sm font-light transition-all duration-200 border ${
+                  data.lastName === 'movement' 
+                    ? 'border-white text-white bg-white/10' 
+                    : 'border-gray-600 text-gray-300 hover:bg-gray-800/50 hover:border-gray-500 hover:text-white'
+                } focus:outline-none`}
+              >
+                Le mouvement (marche, sport)
+              </button>
+              
+              <button
+                onClick={() => handleInputChange('lastName', 'creation')}
+                className={`w-full max-w-xs mx-auto py-2 px-4 rounded-lg text-sm font-light transition-all duration-200 border ${
+                  data.lastName === 'creation' 
+                    ? 'border-white text-white bg-white/10' 
+                    : 'border-gray-600 text-gray-300 hover:bg-gray-800/50 hover:border-gray-500 hover:text-white'
+                } focus:outline-none`}
+              >
+                La création (écrire, jouer, bricoler)
+              </button>
+            </div>
           </div>
         );
 
@@ -234,15 +288,64 @@ const Onboarding = () => {
         return (
           <div className="text-left px-6">
             <h1 className="text-2xl md:text-3xl font-light text-white mb-16 leading-tight">
-              Quelle est votre <span className="text-gray-300">adresse email ?</span>
+              En groupe, quel rôle <span className="text-gray-300">vous vient le plus naturellement ?</span>
             </h1>
-            <input
-              type="email"
-              placeholder="votre@email.com"
-              value={data.email}
-              onChange={(e) => handleInputChange('email', e.target.value)}
-              className="w-full max-w-xs mx-auto bg-transparent border-0 border-b-2 border-gray-600 rounded-none px-0 py-4 text-white text-center text-xl focus:outline-none focus:border-white transition-colors placeholder-gray-500"
-            />
+            <div className="space-y-2">
+              <button
+                onClick={() => handleInputChange('groupRole', 'moteur')}
+                className={`w-full max-w-xs mx-auto py-2 px-4 rounded-lg text-sm font-light transition-all duration-200 border ${
+                  data.groupRole === 'moteur' 
+                    ? 'border-white text-white bg-white/10' 
+                    : 'border-gray-600 text-gray-300 hover:bg-gray-800/50 hover:border-gray-500 hover:text-white'
+                } focus:outline-none`}
+              >
+                Moteur
+              </button>
+              
+              <button
+                onClick={() => handleInputChange('groupRole', 'diplomate')}
+                className={`w-full max-w-xs mx-auto py-2 px-4 rounded-lg text-sm font-light transition-all duration-200 border ${
+                  data.groupRole === 'diplomate' 
+                    ? 'border-white text-white bg-white/10' 
+                    : 'border-gray-600 text-gray-300 hover:bg-gray-800/50 hover:border-gray-500 hover:text-white'
+                } focus:outline-none`}
+              >
+                Diplomate
+              </button>
+              
+              <button
+                onClick={() => handleInputChange('groupRole', 'creatif')}
+                className={`w-full max-w-xs mx-auto py-2 px-4 rounded-lg text-sm font-light transition-all duration-200 border ${
+                  data.groupRole === 'creatif' 
+                    ? 'border-white text-white bg-white/10' 
+                    : 'border-gray-600 text-gray-300 hover:bg-gray-800/50 hover:border-gray-500 hover:text-white'
+                } focus:outline-none`}
+              >
+                Créatif(ve)
+              </button>
+              
+              <button
+                onClick={() => handleInputChange('groupRole', 'observateur')}
+                className={`w-full max-w-xs mx-auto py-2 px-4 rounded-lg text-sm font-light transition-all duration-200 border ${
+                  data.groupRole === 'observateur' 
+                    ? 'border-white text-white bg-white/10' 
+                    : 'border-gray-600 text-gray-300 hover:bg-gray-800/50 hover:border-gray-500 hover:text-white'
+                } focus:outline-none`}
+              >
+                Observateur(rice)
+              </button>
+              
+              <button
+                onClick={() => handleInputChange('groupRole', 'bon-vivant')}
+                className={`w-full max-w-xs mx-auto py-2 px-4 rounded-lg text-sm font-light transition-all duration-200 border ${
+                  data.groupRole === 'bon-vivant' 
+                    ? 'border-white text-white bg-white/10' 
+                    : 'border-gray-600 text-gray-300 hover:bg-gray-800/50 hover:border-gray-500 hover:text-white'
+                } focus:outline-none`}
+              >
+                Bon vivant(e)
+              </button>
+            </div>
           </div>
         );
 
@@ -250,14 +353,81 @@ const Onboarding = () => {
         return (
           <div className="text-left px-6">
             <h1 className="text-2xl md:text-3xl font-light text-white mb-16 leading-tight">
-              Parfait ! Votre <span className="text-gray-300">profil est créé</span>
+              Dans vos choix, qu'avez-vous tendance à <span className="text-gray-300">privilégier d'abord ?</span>
+            </h1>
+            <div className="space-y-2">
+              <button
+                onClick={() => handleInputChange('priority', 'liberte')}
+                className={`w-full max-w-xs mx-auto py-2 px-4 rounded-lg text-sm font-light transition-all duration-200 border ${
+                  data.priority === 'liberte' 
+                    ? 'border-white text-white bg-white/10' 
+                    : 'border-gray-600 text-gray-300 hover:bg-gray-800/50 hover:border-gray-500 hover:text-white'
+                } focus:outline-none`}
+              >
+                Liberté
+              </button>
+              
+              <button
+                onClick={() => handleInputChange('priority', 'securite')}
+                className={`w-full max-w-xs mx-auto py-2 px-4 rounded-lg text-sm font-light transition-all duration-200 border ${
+                  data.priority === 'securite' 
+                    ? 'border-white text-white bg-white/10' 
+                    : 'border-gray-600 text-gray-300 hover:bg-gray-800/50 hover:border-gray-500 hover:text-white'
+                } focus:outline-none`}
+              >
+                Sécurité
+              </button>
+              
+              <button
+                onClick={() => handleInputChange('priority', 'apprentissage')}
+                className={`w-full max-w-xs mx-auto py-2 px-4 rounded-lg text-sm font-light transition-all duration-200 border ${
+                  data.priority === 'apprentissage' 
+                    ? 'border-white text-white bg-white/10' 
+                    : 'border-gray-600 text-gray-300 hover:bg-gray-800/50 hover:border-gray-500 hover:text-white'
+                } focus:outline-none`}
+              >
+                Apprentissage
+              </button>
+              
+              <button
+                onClick={() => handleInputChange('priority', 'sens')}
+                className={`w-full max-w-xs mx-auto py-2 px-4 rounded-lg text-sm font-light transition-all duration-200 border ${
+                  data.priority === 'sens' 
+                    ? 'border-white text-white bg-white/10' 
+                    : 'border-gray-600 text-gray-300 hover:bg-gray-800/50 hover:border-gray-500 hover:text-white'
+                } focus:outline-none`}
+              >
+                Sens
+              </button>
+              
+              <button
+                onClick={() => handleInputChange('priority', 'reconnaissance')}
+                className={`w-full max-w-xs mx-auto py-2 px-4 rounded-lg text-sm font-light transition-all duration-200 border ${
+                  data.priority === 'reconnaissance' 
+                    ? 'border-white text-white bg-white/10' 
+                    : 'border-gray-600 text-gray-300 hover:bg-gray-800/50 hover:border-gray-500 hover:text-white'
+                } focus:outline-none`}
+              >
+                Reconnaissance
+              </button>
+            </div>
+          </div>
+        );
+
+      case 8:
+        return (
+          <div className="text-left px-6">
+            <h1 className="text-2xl md:text-3xl font-light text-white mb-16 leading-tight">
+              <span className="text-gray-300">Merci. Tout est en place</span> pour vous accueillir.
             </h1>
             <div className="bg-gray-900/50 rounded-2xl p-8 max-w-sm mx-auto backdrop-blur-sm">
-              <p className="text-gray-300 mb-3 text-lg"><strong className="text-white">Nom:</strong> {data.firstName} {data.lastName}</p>
-              <p className="text-gray-300 mb-3 text-lg"><strong className="text-white">Email:</strong> {data.email}</p>
               <p className="text-gray-300 mb-3 text-lg"><strong className="text-white">Né(e) le:</strong> {data.birthDate}</p>
               <p className="text-gray-300 mb-3 text-lg"><strong className="text-white">À:</strong> {data.birthTime}</p>
-              <p className="text-gray-300 text-lg"><strong className="text-white">Lieu:</strong> {data.birthPlace}</p>
+              <p className="text-gray-300 mb-3 text-lg"><strong className="text-white">Lieu:</strong> {data.birthPlace}</p>
+              <p className="text-gray-300 mb-3 text-lg"><strong className="text-white">Énergie:</strong> {data.firstName}</p>
+              <p className="text-gray-300 mb-3 text-lg"><strong className="text-white">Ressource:</strong> {data.lastName}</p>
+              <p className="text-gray-300 mb-3 text-lg"><strong className="text-white">Rôle en groupe:</strong> {data.groupRole}</p>
+              <p className="text-gray-300 text-lg"><strong className="text-white">Priorité:</strong> {data.priority}</p>
             </div>
           </div>
         );
@@ -338,7 +508,7 @@ const Onboarding = () => {
             <div className="space-y-3">
               <button
                 onClick={() => {
-                  handleInputChange('birthTime', 'night');
+                  handleInputChange('birthTime', 'environ 04:00');
                   setIsPopupOpen(false);
                 }}
                 className="w-full py-3 px-4 border border-gray-600 text-gray-300 rounded-lg text-sm font-medium hover:bg-gray-800 hover:border-gray-500 hover:text-white transition-colors"
@@ -348,7 +518,7 @@ const Onboarding = () => {
               
               <button
                 onClick={() => {
-                  handleInputChange('birthTime', 'day');
+                  handleInputChange('birthTime', 'environ 12:00');
                   setIsPopupOpen(false);
                 }}
                 className="w-full py-3 px-4 border border-gray-600 text-gray-300 rounded-lg text-sm font-medium hover:bg-gray-800 hover:border-gray-500 hover:text-white transition-colors"
@@ -358,7 +528,7 @@ const Onboarding = () => {
               
               <button
                 onClick={() => {
-                  handleInputChange('birthTime', 'evening');
+                  handleInputChange('birthTime', 'environ 20:00');
                   setIsPopupOpen(false);
                 }}
                 className="w-full py-3 px-4 border border-gray-600 text-gray-300 rounded-lg text-sm font-medium hover:bg-gray-800 hover:border-gray-500 hover:text-white transition-colors"
@@ -368,7 +538,7 @@ const Onboarding = () => {
               
               <button
                 onClick={() => {
-                  handleInputChange('birthTime', 'unknown');
+                  handleInputChange('birthTime', 'par défaut 12:00');
                   setIsPopupOpen(false);
                 }}
                 className="w-full py-3 px-4 border border-gray-600 text-gray-300 rounded-lg text-sm font-medium hover:bg-gray-800 hover:border-gray-500 hover:text-white transition-colors"
