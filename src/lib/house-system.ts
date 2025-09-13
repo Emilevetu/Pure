@@ -34,20 +34,20 @@ export class HouseSystemService {
   private static readonly TROPICAL_YEAR = 365.24219; // Année tropique en jours
 
   /**
-   * Calcule l'heure sidérale locale (LST)
+   * Calcule l'heure sidérale locale (LST) à partir de l'UTC
    * LST = GST + longitude_est
    */
   private static calculateLocalSiderealTime(
-    date: string,
-    time: string,
+    utcDate: string,
+    utcTime: string,
     longitude: number
   ): number {
     console.log(`🕐 [HouseSystem] Calcul de l'heure sidérale locale...`);
-    console.log(`📅 Date: ${date}, Heure: ${time}, Longitude: ${longitude}°`);
+    console.log(`📅 UTC Date: ${utcDate}, UTC Time: ${utcTime}, Longitude: ${longitude}°`);
 
-    // 1. Convertir la date/heure en Julian Day Number
-    const jd = this.dateToJulianDay(date, time);
-    console.log(`📊 Julian Day: ${jd}`);
+    // 1. Convertir la date/heure UTC en Julian Day Number
+    const jd = this.dateToJulianDay(utcDate, utcTime);
+    console.log(`📊 Julian Day (UTC): ${jd}`);
 
     // 2. Calculer le temps sidéral de Greenwich (GST)
     const gst = this.calculateGreenwichSiderealTime(jd);
@@ -128,7 +128,7 @@ export class HouseSystemService {
     const oblRad = (obliquity * Math.PI) / 180;
 
     // Formule de l'Ascendant
-    const numerator = Math.cos(lstRad);
+    const numerator = -Math.cos(lstRad);  // ✅ Correction : signe négatif ajouté
     const denominator = Math.sin(lstRad) * Math.cos(oblRad) + Math.tan(latRad) * Math.sin(oblRad);
 
     let ascendantRad = Math.atan2(numerator, denominator);
@@ -142,13 +142,30 @@ export class HouseSystemService {
   }
 
   /**
-   * Calcule le Milieu du Ciel (MC)
-   * MC = LST (en degrés)
+   * Calcule le Milieu du Ciel (MC) - longitude écliptique
+   * Formule correcte : MC = arctan(sin(LST) / cos(LST) * cos(obliquité))
    */
-  private static calculateMidheaven(lst: number): number {
-    const mc = (lst * 15) % 360;
-    console.log(`🏔️ MC calculé: ${mc.toFixed(6)}°`);
-    return mc;
+  private static calculateMidheaven(lst: number, obliquity: number = this.OBLIQUITY_2000): number {
+    console.log(`🏔️ [HouseSystem] Calcul du MC (longitude écliptique)...`);
+    console.log(`⭐ LST: ${lst.toFixed(6)}h, Obliquité: ${obliquity}°`);
+
+    // Convertir LST en degrés
+    const lstDegrees = lst * 15;
+    console.log(`⭐ LST en degrés: ${lstDegrees.toFixed(6)}°`);
+
+    // Convertir en radians
+    const theta = (lstDegrees * Math.PI) / 180;
+    const eps = (obliquity * Math.PI) / 180;
+
+    // Formule correcte du MC (longitude écliptique)
+    const lamMC = Math.atan2(Math.sin(theta) / Math.cos(eps), Math.cos(theta));
+    
+    // Convertir en degrés et normaliser
+    let mcDegrees = (lamMC * 180) / Math.PI;
+    mcDegrees = ((mcDegrees % 360) + 360) % 360;
+
+    console.log(`🏔️ MC calculé (longitude écliptique): ${mcDegrees.toFixed(6)}°`);
+    return mcDegrees;
   }
 
   /**
@@ -173,8 +190,14 @@ export class HouseSystemService {
   private static getDegreesInSign(longitude: number): { degrees: number; minutes: number } {
     const normalizedLongitude = ((longitude % 360) + 360) % 360;
     const degreesInSign = normalizedLongitude % 30;
-    const degrees = Math.floor(degreesInSign);
-    const minutes = Math.round((degreesInSign - degrees) * 60);
+    let degrees = Math.floor(degreesInSign);
+    let minutes = Math.round((degreesInSign - degrees) * 60);
+    
+    // Gérer le cas où minutes = 60
+    if (minutes === 60) {
+      minutes = 0;
+      degrees = (degrees + 1) % 30;
+    }
     
     return { degrees, minutes };
   }
@@ -242,36 +265,49 @@ export class HouseSystemService {
    */
   static calculateHouseSystem(
     birthData: BirthData,
-    coordinates: BirthCoordinates
+    coordinates: BirthCoordinates,
+    utcDateTime?: string
   ): HouseSystem {
     console.log(`🏠 [HouseSystem] Calcul du système de maisons...`);
     console.log(`📍 Coordonnées: ${coordinates.longitude}°, ${coordinates.latitude}°`);
 
     try {
-      // 1. Calculer l'heure sidérale locale
+      // 1. Convertir l'heure locale en UTC si pas fournie
+      let utcDate: string, utcTime: string;
+      if (utcDateTime) {
+        [utcDate, utcTime] = utcDateTime.split(' ');
+        console.log(`🕐 [HouseSystem] Utilisation de l'UTC fourni: ${utcDateTime}`);
+      } else {
+        // Fallback : utiliser l'heure locale (pour compatibilité)
+        console.warn(`⚠️ [HouseSystem] Aucun UTC fourni, utilisation de l'heure locale (imprécis)`);
+        utcDate = birthData.date;
+        utcTime = birthData.time;
+      }
+
+      // 2. Calculer l'heure sidérale locale
       const lst = this.calculateLocalSiderealTime(
-        birthData.date,
-        birthData.time,
+        utcDate,
+        utcTime,
         coordinates.longitude
       );
 
-      // 2. Calculer l'Ascendant
+      // 3. Calculer l'Ascendant
       const ascendantLongitude = this.calculateAscendant(
         lst,
         coordinates.latitude
       );
 
-      // 3. Calculer le MC
-      const mcLongitude = this.calculateMidheaven(lst);
+      // 4. Calculer le MC (longitude écliptique)
+      const mcLongitude = this.calculateMidheaven(lst, this.OBLIQUITY_2000);
 
-      // 4. Calculer les 12 maisons
+      // 5. Calculer les 12 maisons
       const houses = this.calculatePlacidusHouses(
         ascendantLongitude,
         mcLongitude,
         coordinates.latitude
       );
 
-      // 5. Créer le système de maisons
+      // 6. Créer le système de maisons
       const houseSystem: HouseSystem = {
         ascendant: this.createHouseCusp(1, ascendantLongitude),
         mc: this.createHouseCusp(10, mcLongitude),

@@ -61,7 +61,7 @@ export const fetchAstroData = async (birthData: BirthData): Promise<AstroData> =
 
     // Calculer le système de maisons
     console.log(`🏠 Calcul du système de maisons...`);
-    const houseSystem = HouseSystemService.calculateHouseSystem(birthData, coordinates);
+    const houseSystem = HouseSystemService.calculateHouseSystem(birthData, coordinates, utcDateTime);
     console.log(`✅ Système de maisons calculé: ${houseSystem.system}`);
 
     // Convertir les positions JPL en format AstroData
