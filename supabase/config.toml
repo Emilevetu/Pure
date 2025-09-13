@@ -1,4 +1,3 @@
 project_id = "oytxonaumefjsnkpzbxy"
 
-[functions.jpl-horizons-proxy]
-verify_jwt = false
+# JPL Horizons proxy supprimé - maintenant on utilise le microservice

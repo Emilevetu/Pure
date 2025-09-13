@@ -157,7 +157,7 @@ const Onboarding = () => {
       case 1:
         return (
           <div className="text-left px-6">
-            <h1 className="text-2xl md:text-3xl font-light text-white mb-16 leading-tight">
+            <h1 className="text-2xl md:text-3xl font-light text-white mb-12 leading-tight">
               Quelle est votre <span className="text-gray-300">date de naissance ?</span>
             </h1>
             <input
@@ -172,7 +172,7 @@ const Onboarding = () => {
       case 2:
         return (
           <div className="text-left px-6">
-            <h1 className="text-2xl md:text-3xl font-light text-white mb-16 leading-tight">
+            <h1 className="text-2xl md:text-3xl font-light text-white mb-12 leading-tight">
               Où êtes-vous <span className="text-gray-300">né(e) ?</span>
             </h1>
             <div className="w-full max-w-xs mx-auto">
@@ -190,7 +190,7 @@ const Onboarding = () => {
       case 3:
         return (
           <div className="text-left px-6">
-            <h1 className="text-2xl md:text-3xl font-light text-white mb-8 leading-tight">
+            <h1 className="text-2xl md:text-3xl font-light text-white mb-4 leading-tight">
               À quelle heure <span className="text-gray-300">êtes-vous né(e) ?</span>
             </h1>
             <p className="text-gray-400 text-sm mb-8 leading-relaxed">
@@ -220,7 +220,7 @@ const Onboarding = () => {
       case 4:
         return (
           <div className="text-left px-6">
-            <h1 className="text-2xl md:text-3xl font-light text-white mb-16 leading-tight">
+            <h1 className="text-2xl md:text-3xl font-light text-white mb-12 leading-tight">
               À quel moment de la journée <span className="text-gray-300">vous sentez-vous le plus en forme ?</span>
             </h1>
             <div className="space-y-2">
@@ -285,7 +285,7 @@ const Onboarding = () => {
       case 5:
         return (
           <div className="text-left px-6">
-            <h1 className="text-2xl md:text-3xl font-light text-white mb-16 leading-tight">
+            <h1 className="text-2xl md:text-3xl font-light text-white mb-12 leading-tight">
               Qu'est-ce qui vous <span className="text-gray-300">ressource le plus ?</span>
             </h1>
             <div className="space-y-2">
@@ -350,7 +350,7 @@ const Onboarding = () => {
       case 6:
         return (
           <div className="text-left px-6">
-            <h1 className="text-2xl md:text-3xl font-light text-white mb-16 leading-tight">
+            <h1 className="text-2xl md:text-3xl font-light text-white mb-12 leading-tight">
               En groupe, quel rôle <span className="text-gray-300">vous vient le plus naturellement ?</span>
             </h1>
             <div className="space-y-2">
@@ -415,7 +415,7 @@ const Onboarding = () => {
       case 7:
         return (
           <div className="text-left px-6">
-            <h1 className="text-2xl md:text-3xl font-light text-white mb-16 leading-tight">
+            <h1 className="text-2xl md:text-3xl font-light text-white mb-12 leading-tight">
               Dans vos choix, qu'avez-vous tendance à <span className="text-gray-300">privilégier d'abord ?</span>
             </h1>
             <div className="space-y-2">
@@ -480,7 +480,7 @@ const Onboarding = () => {
       case 8:
         return (
           <div className="text-left px-6">
-            <h1 className="text-2xl md:text-3xl font-light text-white mb-16 leading-tight">
+            <h1 className="text-2xl md:text-3xl font-light text-white mb-12 leading-tight">
               <span className="text-gray-300">Merci. Tout est en place</span> pour vous accueillir.
             </h1>
             <div className="bg-gray-900/50 rounded-2xl p-8 max-w-sm mx-auto backdrop-blur-sm">
@@ -529,8 +529,8 @@ const Onboarding = () => {
       </div>
 
       {/* Contenu principal */}
-      <main className="pt-20">
-        <div className="min-h-screen flex items-start justify-center px-6 pt-2">
+      <main className="pt-20 pb-32">
+        <div className="min-h-[calc(100vh-140px)] flex items-center justify-center px-6">
           <div className="w-full max-w-lg">
             {renderStep()}
           </div>

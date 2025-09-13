@@ -13,9 +13,7 @@ import SavedCharts from "./pages/SavedCharts";
 import ViewChart from "./pages/ViewChart";
 import Friends from "./pages/Friends";
 import Onboarding from "./pages/Onboarding";
-import SimpleAstroTest from "./pages/SimpleAstroTest";
-import SwissEphemerisTest from "./pages/SwissEphemerisTest";
-import TimezoneTest from "./pages/TimezoneTest";
+// Pages de test supprimées - maintenant on utilise le microservice
 import NotFound from "./pages/NotFound";
 import { EmailConfirmationPage } from "./pages/EmailConfirmationPage";
 
@@ -31,9 +29,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/onboarding" element={<Onboarding />} />
-            <Route path="/simple-astro-test" element={<SimpleAstroTest />} />
-            <Route path="/swiss-ephemeris-test" element={<SwissEphemerisTest />} />
-            <Route path="/timezone-test" element={<TimezoneTest />} />
+            {/* Routes de test supprimées - maintenant on utilise le microservice */}
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/profile" element={<Profile />} />

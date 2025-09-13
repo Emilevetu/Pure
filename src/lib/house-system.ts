@@ -3,7 +3,12 @@
  * Implémente le système Placidus pour un thème astral complet
  */
 
-import { BirthCoordinates } from './jpl-horizons';
+// BirthCoordinates est maintenant défini dans microservice-api.ts
+export interface BirthCoordinates {
+  longitude: number;
+  latitude: number;
+  altitude: number;
+}
 
 // Interfaces pour les maisons astrologiques
 export interface HouseCusp {

@@ -1,8 +1,8 @@
 // API utilities for astronomical calculations
-// Maintenant connecté à JPL Horizons de la NASA !
+// Maintenant connecté à votre microservice !
 
-import { JPLHorizonsService, BirthCoordinates, PlanetaryPosition } from './jpl-horizons';
-import { HouseSystemService, HouseSystem } from './house-system';
+import { MicroserviceAPI, BirthCoordinates, PlanetaryPosition } from './microservice-api';
+import { HouseSystem } from './house-system';
 
 interface BirthData {
   date: string;
@@ -34,113 +34,50 @@ interface PlanetPosition {
 
 /**
  * Fonction principale pour récupérer les données astrologiques
- * Utilise JPL Horizons de la NASA pour les vraies positions planétaires
+ * Utilise votre microservice pour les calculs astrologiques
  */
 export const fetchAstroData = async (birthData: BirthData): Promise<AstroData> => {
   try {
+    console.log(`🌍 [AstroService] Début du calcul astrologique pour:`, birthData);
+
     // Récupérer les coordonnées de la ville
-    const coordinates = await JPLHorizonsService.getCityCoordinates(birthData.place);
+    const coordinates = await MicroserviceAPI.getCityCoordinates(birthData.place);
     if (!coordinates) {
       throw new Error(`Coordonnées non trouvées pour: ${birthData.place}`);
     }
 
-    console.log(`🌍 Coordonnées trouvées pour ${birthData.place}:`, coordinates);
+    console.log(`🌍 [AstroService] Coordonnées trouvées pour ${birthData.place}:`, coordinates);
 
     // Convertir la date/heure locale en UTC
-    const utcDateTime = JPLHorizonsService.convertLocalToUTC(birthData.date, birthData.time, birthData.place);
-    console.log(`🕐 Conversion heure locale → UTC: ${birthData.date} ${birthData.time} → ${utcDateTime}`);
+    const timeUtc = await MicroserviceAPI.convertLocalToUTC(birthData.date, birthData.time, birthData.place);
+    console.log(`🕐 [AstroService] Conversion heure locale → UTC: ${birthData.date} ${birthData.time} → ${timeUtc}`);
 
-    // Récupérer les positions de toutes les planètes depuis JPL Horizons
-    const planetaryPositions = await JPLHorizonsService.getAllPlanetaryPositions(utcDateTime, coordinates);
+    // Utiliser la date originale et l'heure UTC convertie
+    const date = birthData.date;
+
+    // Appeler le microservice
+    console.log(`🚀 [AstroService] Appel au microservice...`);
+    const microserviceData = await MicroserviceAPI.getAstroData(date, timeUtc, coordinates);
     
-    if (planetaryPositions.length === 0) {
-      throw new Error('Aucune position planétaire récupérée depuis JPL Horizons');
-    }
+    console.log(`✅ [AstroService] Données reçues du microservice !`);
 
-    console.log(`✅ ${planetaryPositions.length} positions planétaires récupérées depuis la NASA !`);
+    // Convertir vers le format AstroData
+    const astroData = MicroserviceAPI.convertToAstroData(microserviceData, birthData);
 
-    // Calculer le système de maisons
-    console.log(`🏠 Calcul du système de maisons...`);
-    const houseSystem = HouseSystemService.calculateHouseSystem(birthData, coordinates, utcDateTime);
-    console.log(`✅ Système de maisons calculé: ${houseSystem.system}`);
-
-    // Convertir les positions JPL en format AstroData
-    const astroData: AstroData = {
-      sun: {
-        longitude: planetaryPositions.find(p => p.planetId === '10')?.longitude || 0,
-        latitude: planetaryPositions.find(p => p.planetId === '10')?.latitude || 0,
-        sign: getZodiacSign(planetaryPositions.find(p => p.planetId === '10')?.longitude || 0),
-        house: `Maison ${HouseSystemService.getPlanetHouse(planetaryPositions.find(p => p.planetId === '10')?.longitude || 0, houseSystem)}`
-      },
-      moon: {
-        longitude: planetaryPositions.find(p => p.planetId === '301')?.longitude || 0,
-        latitude: planetaryPositions.find(p => p.planetId === '301')?.latitude || 0,
-        sign: getZodiacSign(planetaryPositions.find(p => p.planetId === '301')?.longitude || 0),
-        house: `Maison ${HouseSystemService.getPlanetHouse(planetaryPositions.find(p => p.planetId === '301')?.longitude || 0, houseSystem)}`
-      },
-      mercury: {
-        longitude: planetaryPositions.find(p => p.planetId === '199')?.longitude || 0,
-        latitude: planetaryPositions.find(p => p.planetId === '199')?.latitude || 0,
-        sign: getZodiacSign(planetaryPositions.find(p => p.planetId === '199')?.longitude || 0),
-        house: `Maison ${HouseSystemService.getPlanetHouse(planetaryPositions.find(p => p.planetId === '199')?.longitude || 0, houseSystem)}`
-      },
-      venus: {
-        longitude: planetaryPositions.find(p => p.planetId === '299')?.longitude || 0,
-        latitude: planetaryPositions.find(p => p.planetId === '299')?.latitude || 0,
-        sign: getZodiacSign(planetaryPositions.find(p => p.planetId === '299')?.longitude || 0),
-        house: `Maison ${HouseSystemService.getPlanetHouse(planetaryPositions.find(p => p.planetId === '299')?.longitude || 0, houseSystem)}`
-      },
-      mars: {
-        longitude: planetaryPositions.find(p => p.planetId === '499')?.longitude || 0,
-        latitude: planetaryPositions.find(p => p.planetId === '499')?.latitude || 0,
-        sign: getZodiacSign(planetaryPositions.find(p => p.planetId === '499')?.longitude || 0),
-        house: `Maison ${HouseSystemService.getPlanetHouse(planetaryPositions.find(p => p.planetId === '499')?.longitude || 0, houseSystem)}`
-      },
-      jupiter: {
-        longitude: planetaryPositions.find(p => p.planetId === '599')?.longitude || 0,
-        latitude: planetaryPositions.find(p => p.planetId === '599')?.latitude || 0,
-        sign: getZodiacSign(planetaryPositions.find(p => p.planetId === '599')?.longitude || 0),
-        house: `Maison ${HouseSystemService.getPlanetHouse(planetaryPositions.find(p => p.planetId === '599')?.longitude || 0, houseSystem)}`
-      },
-      saturn: {
-        longitude: planetaryPositions.find(p => p.planetId === '699')?.longitude || 0,
-        latitude: planetaryPositions.find(p => p.planetId === '699')?.latitude || 0,
-        sign: getZodiacSign(planetaryPositions.find(p => p.planetId === '699')?.longitude || 0),
-        house: `Maison ${HouseSystemService.getPlanetHouse(planetaryPositions.find(p => p.planetId === '699')?.longitude || 0, houseSystem)}`
-      },
-      uranus: {
-        longitude: planetaryPositions.find(p => p.planetId === '799')?.longitude || 0,
-        latitude: planetaryPositions.find(p => p.planetId === '799')?.latitude || 0,
-        sign: getZodiacSign(planetaryPositions.find(p => p.planetId === '799')?.longitude || 0),
-        house: `Maison ${HouseSystemService.getPlanetHouse(planetaryPositions.find(p => p.planetId === '799')?.longitude || 0, houseSystem)}`
-      },
-      neptune: {
-        longitude: planetaryPositions.find(p => p.planetId === '899')?.longitude || 0,
-        latitude: planetaryPositions.find(p => p.planetId === '899')?.latitude || 0,
-        sign: getZodiacSign(planetaryPositions.find(p => p.planetId === '899')?.longitude || 0),
-        house: `Maison ${HouseSystemService.getPlanetHouse(planetaryPositions.find(p => p.planetId === '899')?.longitude || 0, houseSystem)}`
-      },
-      pluto: {
-        longitude: planetaryPositions.find(p => p.planetId === '999')?.longitude || 0,
-        latitude: planetaryPositions.find(p => p.planetId === '999')?.latitude || 0,
-        sign: getZodiacSign(planetaryPositions.find(p => p.planetId === '999')?.longitude || 0),
-        house: `Maison ${HouseSystemService.getPlanetHouse(planetaryPositions.find(p => p.planetId === '999')?.longitude || 0, houseSystem)}`
-      },
-      planets: planetaryPositions, // Ajout des données brutes JPL Horizons
-      houseSystem: houseSystem // Système de maisons complet
-    };
-
+    console.log(`🎯 [AstroService] Calcul astrologique terminé avec succès !`);
     return astroData;
 
   } catch (error) {
-    console.warn('Erreur JPL Horizons, utilisation des données mock:', error);
-    // En cas d'erreur, on utilise les données mock
+    console.error('❌ [AstroService] Erreur lors du calcul astrologique:', error);
+    console.warn('🔄 [AstroService] Utilisation des données mock en fallback...');
+    
+    // En cas d'erreur, utiliser les données mock
     return fetchMockAstroData(birthData);
   }
 };
 
 /**
- * Fonction mock pour simuler l'API (gardée en cas d'erreur JPL Horizons)
+ * Fonction mock pour simuler l'API (gardée en cas d'erreur du microservice)
  */
 const fetchMockAstroData = async (birthData: BirthData): Promise<AstroData> => {
   // Simulate API delay
@@ -233,11 +170,11 @@ export const generateAIInterpretation = async (astroData: AstroData): Promise<st
     
     // Pour l'instant, retourner une interprétation statique
     // Plus tard, on pourra intégrer OpenAI ou une autre IA
-    return `Interprétation basée sur les positions réelles des planètes calculées par la NASA (JPL Horizons).
+    return `Interprétation basée sur les positions réelles des planètes calculées par votre microservice.
     
     Votre thème astral révèle une personnalité unique influencée par les alignements célestes au moment de votre naissance.
     
-    Cette analyse utilise les données astronomiques les plus précises disponibles, calculées par les scientifiques de la NASA.`;
+    Cette analyse utilise les données astronomiques les plus précises disponibles, calculées par votre microservice spécialisé.`;
     
   } catch (error) {
     console.error('Erreur lors de la génération IA:', error);

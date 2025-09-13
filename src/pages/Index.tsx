@@ -4,10 +4,9 @@ import Header from '../components/Header';
 import BirthForm from '../components/BirthForm';
 import ResultCard from '../components/ResultCard';
 import Footer from '../components/Footer';
-import TableauPlanetes from '../components/TableauPlanetes';
 import AIAstrologyAnalysis from '../components/AIAstrologyAnalysis';
 import { SaveChartButton } from '../components/SaveChartButton';
-import { PlanetaryPosition } from '../lib/jpl-horizons';
+import { PlanetaryPosition } from '../lib/microservice-api';
 import { fetchAstroData } from '../lib/astro';
 
 
@@ -176,14 +175,6 @@ const Index = () => {
           </section>
         )}
         
-        {/* Tableau des Planètes - Affiché seulement après réception des données */}
-        {planetaryData.length > 0 && (
-          <section className="py-20 px-6 bg-gray-50">
-            <div className="container mx-auto">
-              <TableauPlanetes planetaryData={planetaryData} birthData={birthData} />
-            </div>
-          </section>
-        )}
         
         {/* Analyse Astrologique IA - Entre le tableau et la carte céleste */}
         {planetaryData.length > 0 && birthData && (

@@ -20,7 +20,6 @@ import {
   Share
 } from 'lucide-react';
 import ResultCard from '@/components/ResultCard';
-import TableauPlanetes from '@/components/TableauPlanetes';
 import AIAstrologyAnalysis from '@/components/AIAstrologyAnalysis';
 
 interface SavedChart {
@@ -259,10 +258,6 @@ const ViewChart: React.FC = () => {
                   </p>
                 </div>
                 
-                <TableauPlanetes 
-                  planetaryData={chart.planetary_positions} 
-                  birthData={chart.birth_data as any} 
-                />
               </section>
             )}
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { PlanetaryPosition } from '../lib/jpl-horizons';
+import { PlanetaryPosition } from '../lib/microservice-api';
 import { ChatGPTService } from '../lib/chatgpt-service';
 
 interface BirthData {

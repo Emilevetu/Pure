@@ -13,23 +13,7 @@ export default defineConfig(({ mode }) => {
       host: env.VITE_SERVER_HOST || "::",
       port: parseInt(env.VITE_SERVER_PORT) || 8080,
       proxy: {
-        // Proxy pour JPL Horizons de la NASA
-        '/api/jpl-horizons': {
-          target: 'https://ssd.jpl.nasa.gov',
-          changeOrigin: true,
-          rewrite: (path) => path.replace(/^\/api\/jpl-horizons/, '/api/horizons'),
-          configure: (proxy, _options) => {
-            proxy.on('error', (err, _req, _res) => {
-              console.log('proxy error', err);
-            });
-            proxy.on('proxyReq', (proxyReq, req, _res) => {
-              console.log('Sending Request to the Target:', req.method, req.url);
-            });
-            proxy.on('proxyRes', (proxyRes, req, _res) => {
-              console.log('Received Response from the Target:', proxyRes.statusCode, req.url);
-            });
-          },
-        }
+        // Proxy JPL Horizons supprimé - maintenant on utilise le microservice
       }
     },
     plugins: [
