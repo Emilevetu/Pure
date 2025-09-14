@@ -122,7 +122,7 @@ const Index = () => {
         
         {/* Hero Section */}
       <main id="hero" className="pt-20">
-        <section className="py-20 px-6">
+        <section className="py-2 px-6">
           <div className="container mx-auto">
             <div className="max-w-4xl mx-auto text-center">
               {/* Main title */}

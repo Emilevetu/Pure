@@ -19,7 +19,8 @@ import {
   Target,
   Sun,
   Moon,
-  Orbit
+  Orbit,
+  Edit
 } from 'lucide-react';
 import { ProfileService, UserProfile } from '../lib/profile-service';
 import { fetchAstroData } from '@/lib/astro';
@@ -184,69 +185,89 @@ const Profile: React.FC = () => {
             ) : userProfile ? (
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
-                    <Calendar className="h-5 w-5" />
-                    <span>Mon profil</span>
-                  </CardTitle>
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="flex items-center space-x-2">
+                      <Calendar className="h-5 w-5" />
+                      <span>Mon profil</span>
+                    </CardTitle>
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      className="p-2"
+                      onClick={() => navigate('/onboarding')}
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                  </div>
                   <CardDescription>
                     Vos informations personnelles
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="flex items-center space-x-3 p-3 bg-muted/30 rounded-lg">
-                      <Calendar className="h-5 w-5 text-muted-foreground" />
-                      <div>
-                        <p className="text-sm text-muted-foreground">Né(e) le</p>
-                        <p className="font-medium">{userProfile.birth_date}</p>
+                <CardContent className="space-y-3">
+                  {/* Date - Heure */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="flex items-center space-x-2 p-2.5 bg-muted/20 rounded-lg">
+                      <Calendar className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                      <div className="min-w-0">
+                        <p className="text-xs text-muted-foreground truncate">Date</p>
+                        <p className="font-medium text-sm truncate">
+                          {userProfile.birth_date ? new Date(userProfile.birth_date).toLocaleDateString('fr-FR').replace(/\//g, '-') : userProfile.birth_date}
+                        </p>
                       </div>
                     </div>
                     
-                    <div className="flex items-center space-x-3 p-3 bg-muted/30 rounded-lg">
-                      <MapPin className="h-5 w-5 text-muted-foreground" />
-                      <div>
-                        <p className="text-sm text-muted-foreground">Lieu de naissance</p>
-                        <p className="font-medium">{userProfile.birth_place}</p>
+                    <div className="flex items-center space-x-2 p-2.5 bg-muted/20 rounded-lg">
+                      <Clock className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                      <div className="min-w-0">
+                        <p className="text-xs text-muted-foreground truncate">Heure</p>
+                        <p className="font-medium text-sm truncate">{userProfile.birth_time}</p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Lieu (seul sur la ligne) */}
+                  <div className="flex items-center space-x-2 p-2.5 bg-muted/20 rounded-lg">
+                    <MapPin className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                    <div className="min-w-0">
+                      <p className="text-xs text-muted-foreground truncate">Lieu</p>
+                      <p className="font-medium text-sm truncate">{userProfile.birth_place}</p>
+                    </div>
+                  </div>
+                  
+                  {/* Énergie - Ressource */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="flex items-center space-x-2 p-2.5 bg-muted/20 rounded-lg">
+                      <Zap className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                      <div className="min-w-0">
+                        <p className="text-xs text-muted-foreground truncate">Énergie</p>
+                        <p className="font-medium text-sm truncate">{userProfile.energy_time}</p>
                       </div>
                     </div>
                     
-                    <div className="flex items-center space-x-3 p-3 bg-muted/30 rounded-lg">
-                      <Clock className="h-5 w-5 text-muted-foreground" />
-                      <div>
-                        <p className="text-sm text-muted-foreground">Heure de naissance</p>
-                        <p className="font-medium">{userProfile.birth_time}</p>
+                    <div className="flex items-center space-x-2 p-2.5 bg-muted/20 rounded-lg">
+                      <Heart className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                      <div className="min-w-0">
+                        <p className="text-xs text-muted-foreground truncate">Ressource</p>
+                        <p className="font-medium text-sm truncate">{userProfile.resource}</p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Rôle - Priorité */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="flex items-center space-x-2 p-2.5 bg-muted/20 rounded-lg">
+                      <Users className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                      <div className="min-w-0">
+                        <p className="text-xs text-muted-foreground truncate">Rôle</p>
+                        <p className="font-medium text-sm truncate">{userProfile.group_role}</p>
                       </div>
                     </div>
                     
-                    <div className="flex items-center space-x-3 p-3 bg-muted/30 rounded-lg">
-                      <Zap className="h-5 w-5 text-muted-foreground" />
-                      <div>
-                        <p className="text-sm text-muted-foreground">Énergie</p>
-                        <p className="font-medium">{userProfile.energy_time}</p>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center space-x-3 p-3 bg-muted/30 rounded-lg">
-                      <Heart className="h-5 w-5 text-muted-foreground" />
-                      <div>
-                        <p className="text-sm text-muted-foreground">Ressource</p>
-                        <p className="font-medium">{userProfile.resource}</p>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center space-x-3 p-3 bg-muted/30 rounded-lg">
-                      <Users className="h-5 w-5 text-muted-foreground" />
-                      <div>
-                        <p className="text-sm text-muted-foreground">Rôle en groupe</p>
-                        <p className="font-medium">{userProfile.group_role}</p>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center space-x-3 p-3 bg-muted/30 rounded-lg col-span-1 md:col-span-2">
-                      <Target className="h-5 w-5 text-muted-foreground" />
-                      <div>
-                        <p className="text-sm text-muted-foreground">Priorité</p>
-                        <p className="font-medium">{userProfile.priority}</p>
+                    <div className="flex items-center space-x-2 p-2.5 bg-muted/20 rounded-lg">
+                      <Target className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                      <div className="min-w-0">
+                        <p className="text-xs text-muted-foreground truncate">Priorité</p>
+                        <p className="font-medium text-sm truncate">{userProfile.priority}</p>
                       </div>
                     </div>
                   </div>

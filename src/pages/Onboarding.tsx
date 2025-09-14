@@ -7,6 +7,7 @@ import { convertOnboardingToBirthData } from '../lib/onboarding-utils';
 import { fetchAstroData } from '../lib/astro';
 import { ProfileService } from '../lib/profile-service';
 import { useAuth } from '../contexts/AuthContext';
+import { ChatGPTService } from '../lib/chatgpt-service';
 
 interface OnboardingData {
   birthDate: string;
@@ -23,6 +24,7 @@ const Onboarding = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [currentStep, setCurrentStep] = useState(1);
+  
   const [data, setData] = useState<OnboardingData>({
     birthDate: '',
     birthPlace: '',
@@ -35,19 +37,120 @@ const Onboarding = () => {
   });
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+  const [showSecondText, setShowSecondText] = useState(false);
+  const [profileAnalysis, setProfileAnalysis] = useState<string>('');
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [showAnalysis, setShowAnalysis] = useState(false);
 
   const totalSteps = 8;
-
-  // Empêcher le scroll sur la page
+  
+  // Forcer le re-render après le montage et scroll vers le haut
   useEffect(() => {
-    // Sauvegarder la position de scroll actuelle
-    const scrollY = window.scrollY;
+    // Forcer le scroll vers le haut pour éviter l'héritage de position
+    window.scrollTo(0, 0);
     
-    // Empêcher le scroll
-    document.body.style.overflow = 'hidden';
-    document.body.style.position = 'fixed';
-    document.body.style.top = `-${scrollY}px`;
-    document.body.style.width = '100%';
+    const timer = setTimeout(() => {
+      setIsMounted(true);
+    }, 100);
+    
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Afficher la deuxième phrase après 1,5 secondes - ANTI-FOUC
+  useEffect(() => {
+    if (currentStep !== 8 || !isMounted) return;
+    
+    setShowSecondText(false); // reset propre
+    
+    const timer = setTimeout(() => {
+      setShowSecondText(true);
+    }, 1500);
+    
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [currentStep, isMounted]);
+
+  // Afficher l'analyse après 2,5 secondes (1 seconde après la deuxième phrase)
+  useEffect(() => {
+    if (currentStep !== 8 || !isMounted) return;
+    
+    setShowAnalysis(false); // reset propre
+    
+    const timer = setTimeout(() => {
+      // Vérifier que l'analyse est prête avant de l'afficher
+      if (profileAnalysis) {
+        setShowAnalysis(true);
+      }
+    }, 2500);
+    
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [currentStep, isMounted, profileAnalysis]);
+
+  // Analyser le profil à l'étape 8
+  useEffect(() => {
+    if (currentStep !== 8 || !isMounted) return;
+    
+    const analyzeProfile = async () => {
+      setIsAnalyzing(true);
+      
+      try {
+        // Récupérer les données astrologiques depuis le profil
+        if (user?.id) {
+          const userProfile = await ProfileService.getUserProfile(user.id);
+          
+          if (userProfile?.astro_data) {
+            // Préparer les données de profil pour l'analyse
+            const profileData = {
+              energy: userProfile.energy_time,
+              resources: userProfile.resource,
+              role: userProfile.group_role,
+              priority: userProfile.priority
+            };
+            
+            console.log('🔍 [Onboarding] Lancement de l\'analyse de profil...');
+            const analysis = await ChatGPTService.generateProfileAnalysis(
+              userProfile.astro_data,
+              profileData
+            );
+            
+            if (analysis.content) {
+              setProfileAnalysis(analysis.content);
+              console.log('✅ [Onboarding] Analyse de profil terminée');
+            } else {
+              console.error('❌ [Onboarding] Erreur analyse profil:', analysis.error);
+            }
+          }
+        }
+      } catch (error) {
+        console.error('❌ [Onboarding] Erreur lors de l\'analyse de profil:', error);
+      } finally {
+        setIsAnalyzing(false);
+      }
+    };
+    
+    analyzeProfile();
+  }, [currentStep, isMounted, user?.id]);
+
+  // Gérer le scroll selon l'étape
+  useEffect(() => {
+    if (currentStep === 8) {
+      // Étape 8 : autoriser le scroll pour lire l'analyse de profil
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.width = '';
+    } else {
+      // Autres étapes : empêcher le scroll
+      const scrollY = window.scrollY;
+      document.body.style.overflow = 'hidden';
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.width = '100%';
+    }
     
     // Nettoyer au démontage du composant
     return () => {
@@ -55,9 +158,8 @@ const Onboarding = () => {
       document.body.style.position = '';
       document.body.style.top = '';
       document.body.style.width = '';
-      window.scrollTo(0, scrollY);
     };
-  }, []);
+  }, [currentStep]);
 
   const handleNext = async () => {
     // Appel API spécial pour l'étape 3 (heure de naissance) - EN ARRIÈRE-PLAN
@@ -68,12 +170,12 @@ const Onboarding = () => {
       // Convertir les données d'onboarding en format BirthData
       const birthData = convertOnboardingToBirthData(data);
       
-      // Lancer l'API NASA en arrière-plan (sans await)
+      // Lancer l'appel microservice en arrière-plan (sans await)
       console.log('🌍 [Onboarding] Lancement de fetchAstroData en arrière-plan avec:', birthData);
       fetchAstroData(birthData)
         .then(astroData => {
           console.log('✅ [Onboarding] Données astrologiques récupérées en arrière-plan:', astroData);
-          console.log('🎯 [Onboarding] Appel API NASA terminé avec succès !');
+          console.log('🎯 [Onboarding] Appel microservice terminé avec succès !');
           
           // Mettre à jour les données astrologiques dans le profil
           if (user?.id) {
@@ -83,7 +185,7 @@ const Onboarding = () => {
           }
         })
         .catch(error => {
-          console.error('❌ [Onboarding] Erreur lors de l\'appel API NASA en arrière-plan:', error);
+          console.error('❌ [Onboarding] Erreur lors de l\'appel microservice en arrière-plan:', error);
           console.log('⚠️ [Onboarding] L\'onboarding continue malgré l\'erreur...');
         });
     }
@@ -127,6 +229,11 @@ const Onboarding = () => {
   };
 
   const handleBack = () => {
+    // Empêcher le retour en arrière sur la dernière page (profil complet)
+    if (currentStep === 8) {
+      return;
+    }
+    
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
     } else {
@@ -301,9 +408,9 @@ const Onboarding = () => {
               </button>
               
               <button
-                onClick={() => handleInputChange('lastName', 'family')}
+                onClick={() => handleInputChange('lastName', 'amis et proches')}
                 className={`w-full max-w-xs mx-auto py-2 px-4 rounded-lg text-sm font-light transition-all duration-200 border ${
-                  data.lastName === 'family' 
+                  data.lastName === 'amis et proches' 
                     ? 'border-white text-white bg-white/10' 
                     : 'border-gray-600 text-gray-300 hover:bg-gray-800/50 hover:border-gray-500 hover:text-white'
                 } focus:outline-none`}
@@ -480,18 +587,31 @@ const Onboarding = () => {
       case 8:
         return (
           <div className="text-left px-6">
-            <h1 className="text-2xl md:text-3xl font-light text-white mb-16 leading-tight">
+            <h1 className="text-2xl md:text-3xl font-light text-white leading-tight">
               <span className="text-gray-300">Merci. Tout est en place</span> pour vous accueillir.
             </h1>
-            <div className="bg-gray-900/50 rounded-2xl p-8 max-w-sm mx-auto backdrop-blur-sm">
-              <p className="text-gray-300 mb-3 text-lg"><strong className="text-white">Né(e) le:</strong> {data.birthDate}</p>
-              <p className="text-gray-300 mb-3 text-lg"><strong className="text-white">À:</strong> {data.birthTime}</p>
-              <p className="text-gray-300 mb-3 text-lg"><strong className="text-white">Lieu:</strong> {data.birthPlace}</p>
-              <p className="text-gray-300 mb-3 text-lg"><strong className="text-white">Énergie:</strong> {data.firstName}</p>
-              <p className="text-gray-300 mb-3 text-lg"><strong className="text-white">Ressource:</strong> {data.lastName}</p>
-              <p className="text-gray-300 mb-3 text-lg"><strong className="text-white">Rôle en groupe:</strong> {data.groupRole}</p>
-              <p className="text-gray-300 text-lg"><strong className="text-white">Priorité:</strong> {data.priority}</p>
+            <div 
+              className={`mt-8 transition-opacity duration-1000 ${showSecondText ? 'opacity-100' : 'opacity-0'}`}
+              style={{ opacity: showSecondText ? 1 : 0 }}
+              aria-hidden={!showSecondText}
+            >
+              <h2 className="text-2xl md:text-3xl font-light text-gray-300 leading-tight">
+                Vous êtes un humain unique.
+              </h2>
             </div>
+            
+            {/* Analyse de profil */}
+            {profileAnalysis && (
+              <div 
+                className={`mt-8 transition-opacity duration-1000 ${showAnalysis ? 'opacity-100' : 'opacity-0'}`}
+                style={{ opacity: showAnalysis ? 1 : 0 }}
+                aria-hidden={!showAnalysis}
+              >
+                <p className="text-2xl md:text-3xl font-light text-gray-300 leading-tight">
+                  {profileAnalysis}
+                </p>
+              </div>
+            )}
           </div>
         );
 
@@ -505,12 +625,15 @@ const Onboarding = () => {
       {/* Header avec indicateur de progression */}
       <div className="fixed top-0 left-0 right-0 z-50 bg-black">
         <div className="flex items-center justify-between px-6 py-4">
-          <button
-            onClick={handleBack}
-            className="text-white text-2xl hover:text-gray-300 transition-colors"
-          >
-            ←
-          </button>
+          {currentStep !== 8 && (
+            <button
+              onClick={handleBack}
+              className="text-white text-2xl hover:text-gray-300 transition-colors"
+            >
+              ←
+            </button>
+          )}
+          {currentStep === 8 && <div className="w-6" />}
           
                 {/* Indicateur de progression */}
                 <div className="flex space-x-1.5">
@@ -530,9 +653,14 @@ const Onboarding = () => {
 
       {/* Contenu principal */}
       <main className="pt-20">
-        <div className="min-h-screen flex items-start justify-center px-6 pt-2">
+        <div className="min-h-screen flex items-start justify-center px-6 pt-2 pb-32">
           <div className="w-full max-w-lg">
-            {renderStep()}
+            {isMounted ? <div key={currentStep}>{renderStep()}</div> : (
+              <div className="text-center text-white">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-4"></div>
+                <p>Chargement...</p>
+              </div>
+            )}
           </div>
         </div>
       </main>
