@@ -6,7 +6,6 @@ import { AuthGuard } from '@/components/auth/AuthGuard';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 import { 
   Star,
@@ -20,7 +19,8 @@ import {
   Sun,
   Moon,
   Orbit,
-  Edit
+  Edit,
+  Settings
 } from 'lucide-react';
 import { ProfileService, UserProfile } from '../lib/profile-service';
 import { fetchAstroData } from '@/lib/astro';
@@ -151,22 +151,30 @@ const Profile: React.FC = () => {
 
   return (
     <AuthGuard>
-      <div className="min-h-screen bg-gradient-to-br from-background to-muted/20">
-        <div className="container mx-auto px-6 py-20">
+      <div className="min-h-screen bg-gradient-to-br from-background to-muted/20 pt-2">
+        <div className="container mx-auto px-6 py-8 pb-24">
           <div className="max-w-4xl mx-auto space-y-8">
-            {/* En-tête du profil */}
-            <div className="text-center space-y-4">
-              <Avatar className="h-24 w-24 mx-auto">
-                <AvatarFallback className="bg-primary text-primary-foreground text-2xl">
-                  {getInitials(user.name)}
-                </AvatarFallback>
-              </Avatar>
-              <div>
-                <h1 className="text-3xl font-bold">{user.name}</h1>
-                <p className="text-muted-foreground">{user.email}</p>
-                <Badge variant="secondary" className="mt-2">
-                  Membre depuis {new Date(user.createdAt).getFullYear()}
-                </Badge>
+            {/* En-tête du profil avec bouton Settings */}
+            <div className="flex items-center justify-between">
+              <div className="flex-1"></div>
+              <div className="text-center space-y-2 flex-1">
+                <div>
+                  <h1 className="text-3xl font-bold">{user.name}</h1>
+                  <p className="text-muted-foreground">{user.email}</p>
+                  <Badge variant="secondary" className="mt-2">
+                    Membre depuis {new Date(user.createdAt).getFullYear()}
+                  </Badge>
+                </div>
+              </div>
+              <div className="flex-1 flex justify-end">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="w-12 h-12 bg-gray-800 hover:bg-gray-700 text-white rounded-full p-0 flex items-center justify-center"
+                  onClick={() => navigate('/settings')}
+                >
+                  <Settings className="w-6 h-6" />
+                </Button>
               </div>
             </div>
 

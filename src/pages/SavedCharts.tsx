@@ -104,7 +104,7 @@ const SavedCharts: React.FC = () => {
     return (
       <AuthGuard>
         <div className="min-h-screen bg-gradient-to-br from-background to-muted/20">
-          <div className="container mx-auto px-6 py-20">
+          <div className="container mx-auto px-6 py-20 pb-24">
             <div className="max-w-4xl mx-auto">
               <div className="flex items-center justify-center py-20">
                 <div className="flex flex-col items-center space-y-4">
@@ -122,7 +122,7 @@ const SavedCharts: React.FC = () => {
   return (
     <AuthGuard>
       <div className="min-h-screen bg-gradient-to-br from-background to-muted/20">
-        <div className="container mx-auto px-6 py-20">
+        <div className="container mx-auto px-6 py-20 pb-24">
           <div className="max-w-4xl mx-auto space-y-8">
             {/* En-tête */}
             <div className="text-center space-y-4">

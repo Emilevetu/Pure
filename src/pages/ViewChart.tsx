@@ -20,7 +20,6 @@ import {
   Share
 } from 'lucide-react';
 import ResultCard from '@/components/ResultCard';
-import AIAstrologyAnalysis from '@/components/AIAstrologyAnalysis';
 
 interface SavedChart {
   id: string;
@@ -108,7 +107,7 @@ const ViewChart: React.FC = () => {
     return (
       <AuthGuard>
         <div className="min-h-screen bg-gradient-to-br from-background to-muted/20">
-          <div className="container mx-auto px-6 py-20">
+          <div className="container mx-auto px-6 py-20 pb-24">
             <div className="max-w-4xl mx-auto">
               <div className="flex items-center justify-center py-20">
                 <div className="flex flex-col items-center space-y-4">
@@ -127,7 +126,7 @@ const ViewChart: React.FC = () => {
     return (
       <AuthGuard>
         <div className="min-h-screen bg-gradient-to-br from-background to-muted/20">
-          <div className="container mx-auto px-6 py-20">
+          <div className="container mx-auto px-6 py-20 pb-24">
             <div className="max-w-4xl mx-auto">
               <div className="text-center space-y-6">
                 <h1 className="text-3xl font-bold">Thème Astral Non Trouvé</h1>
@@ -149,7 +148,7 @@ const ViewChart: React.FC = () => {
   return (
     <AuthGuard>
       <div className="min-h-screen bg-gradient-to-br from-background to-muted/20">
-        <div className="container mx-auto px-6 py-20">
+        <div className="container mx-auto px-6 py-20 pb-24">
           <div className="max-w-6xl mx-auto space-y-8">
             {/* En-tête avec navigation */}
             <div className="flex items-center justify-between">
@@ -271,10 +270,6 @@ const ViewChart: React.FC = () => {
                   </p>
                 </div>
                 
-                <AIAstrologyAnalysis 
-                  planetaryData={chart.planetary_positions} 
-                  birthData={chart.birth_data as any} 
-                />
               </section>
             )}
           </div>
