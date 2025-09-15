@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useUser } from '@/contexts/AuthContext';
+import { useUser, useAuth } from '@/contexts/AuthContext';
 import { userAPI } from '@/lib/api';
 import { AuthGuard } from '@/components/auth/AuthGuard';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -20,7 +20,8 @@ import {
   Moon,
   Orbit,
   Edit,
-  Settings
+  Settings,
+  LogOut
 } from 'lucide-react';
 import { ProfileService, UserProfile } from '../lib/profile-service';
 import { fetchAstroData } from '@/lib/astro';
@@ -28,6 +29,7 @@ import { fetchAstroData } from '@/lib/astro';
 const Profile: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useUser();
+  const { logout } = useAuth();
   const [chartsCount, setChartsCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
@@ -441,6 +443,18 @@ const Profile: React.FC = () => {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Bouton Se déconnecter */}
+            <div className="mt-8 flex justify-center">
+              <Button
+                variant="outline"
+                onClick={logout}
+                className="flex items-center space-x-2 text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300"
+              >
+                <LogOut className="w-4 h-4" />
+                <span>Se déconnecter</span>
+              </Button>
+            </div>
           </div>
         </div>
       </div>

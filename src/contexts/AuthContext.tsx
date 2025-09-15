@@ -124,6 +124,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         });
         lastHandledUserId.current = null;
         profileEnsuredForUserId.current = null;
+        
+        // Rediriger vers la page de login si on n'y est pas déjà
+        if (window.location.pathname !== '/login' && window.location.pathname !== '/register') {
+          window.location.href = '/login';
+        }
       }
     };
 
@@ -238,6 +243,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       await supabase.auth.signOut();
       // L'état sera mis à jour par onAuthStateChange
+      // Rediriger vers la page de login
+      window.location.href = '/login';
     } catch (error) {
       console.error('Erreur lors de la déconnexion:', error);
     }

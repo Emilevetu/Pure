@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import { User, Users } from 'lucide-react';
+import { AuthGuard } from '@/components/auth/AuthGuard';
 
 
 
@@ -17,7 +18,8 @@ const Index = () => {
 
 
   return (
-    <div className="min-h-screen pb-20">
+    <AuthGuard>
+      <div className="min-h-screen pb-20">
               <Header />
         
         {/* Hero Section */}
@@ -89,7 +91,8 @@ const Index = () => {
         
       </main>
       
-    </div>
+      </div>
+    </AuthGuard>
   );
 };
 

@@ -107,8 +107,8 @@ const Settings: React.FC = () => {
         // Se déconnecter
         await logout();
         
-        // Rediriger vers l'accueil
-        navigate('/', { replace: true });
+        // Rediriger vers la page de login
+        navigate('/login', { replace: true });
       }, 2000);
       
     } catch (error: any) {

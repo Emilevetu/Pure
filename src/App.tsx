@@ -23,8 +23,10 @@ const queryClient = new QueryClient();
 const AppContent = () => {
   const location = useLocation();
   
-  // Masquer la navigation pendant l'onboarding
-  const showBottomNav = !location.pathname.startsWith('/onboarding');
+  // Masquer la navigation pendant l'onboarding, login et register
+  const showBottomNav = !location.pathname.startsWith('/onboarding') && 
+                       !location.pathname.startsWith('/login') && 
+                       !location.pathname.startsWith('/register');
 
   return (
     <>
