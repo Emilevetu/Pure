@@ -36,49 +36,143 @@ const Profile: React.FC = () => {
   const [profileLoading, setProfileLoading] = useState(true);
   const [astroLoading, setAstroLoading] = useState(false);
 
-  useEffect(() => {
-    if (user) {
-      loadChartsCount();
-      loadUserProfile();
-    }
-  }, [user]);
+  // Cache configuration
+  const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+  const CACHE_KEYS = {
+    profile: 'profile_cache',
+    chartsCount: 'charts_count_cache',
+    timestamp: 'profile_cache_timestamp'
+  };
 
-  const loadChartsCount = async () => {
+  // Cache functions
+  const isCacheValid = (): boolean => {
+    const timestamp = localStorage.getItem(CACHE_KEYS.timestamp);
+    if (!timestamp) return false;
+    return (Date.now() - parseInt(timestamp)) < CACHE_DURATION;
+  };
+
+  const loadFromCache = (): boolean => {
+    if (!isCacheValid()) return false;
+    
     try {
-      const response = await userAPI.getSavedCharts();
-      if (response.success && response.data) {
-        setChartsCount(response.data.length);
+      const cachedProfile = localStorage.getItem(CACHE_KEYS.profile);
+      const cachedChartsCount = localStorage.getItem(CACHE_KEYS.chartsCount);
+      
+      if (cachedProfile) {
+        setUserProfile(JSON.parse(cachedProfile));
+        console.log('✅ [Profile] Profil chargé depuis le cache');
       }
+      if (cachedChartsCount) {
+        setChartsCount(JSON.parse(cachedChartsCount));
+        console.log('✅ [Profile] Nombre de thèmes chargé depuis le cache');
+      }
+      
+      return true;
     } catch (error) {
-      console.error('Erreur lors du chargement du nombre de thèmes:', error);
-    } finally {
-      setIsLoading(false);
+      console.error('❌ [Profile] Erreur lors du chargement du cache:', error);
+      return false;
     }
   };
 
-  const loadUserProfile = async () => {
+  const saveToCache = (profileData: UserProfile | null, chartsCountData: number) => {
+    try {
+      if (profileData) {
+        localStorage.setItem(CACHE_KEYS.profile, JSON.stringify(profileData));
+      }
+      localStorage.setItem(CACHE_KEYS.chartsCount, JSON.stringify(chartsCountData));
+      localStorage.setItem(CACHE_KEYS.timestamp, Date.now().toString());
+      console.log('💾 [Profile] Données sauvegardées dans le cache');
+    } catch (error) {
+      console.error('❌ [Profile] Erreur lors de la sauvegarde du cache:', error);
+    }
+  };
+
+  const clearCache = () => {
+    localStorage.removeItem(CACHE_KEYS.profile);
+    localStorage.removeItem(CACHE_KEYS.chartsCount);
+    localStorage.removeItem(CACHE_KEYS.timestamp);
+    console.log('🗑️ [Profile] Cache vidé');
+  };
+
+  useEffect(() => {
+    if (user) {
+      console.log('🔍 [Profile] useEffect - user trouvé, chargement des données');
+      
+      // Essayer de charger depuis le cache d'abord
+      if (loadFromCache()) {
+        setIsLoading(false);
+        setProfileLoading(false);
+        // Charger en arrière-plan pour mettre à jour le cache
+        loadProfileData(true);
+      } else {
+        // Pas de cache valide, charger normalement
+        loadProfileData();
+      }
+    } else {
+      console.log('🔍 [Profile] useEffect - pas de user, pas de chargement');
+    }
+  }, [user]);
+
+  // Timeout de sécurité pour éviter le chargement infini
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      if (isLoading || profileLoading) {
+        console.log('⏰ [Profile] Timeout de sécurité - arrêt du chargement après 10s');
+        setIsLoading(false);
+        setProfileLoading(false);
+      }
+    }, 10000);
+
+    return () => clearTimeout(timeoutId);
+  }, [isLoading, profileLoading]);
+
+  const loadProfileData = async (backgroundRefresh = false) => {
     if (!user?.id) {
       console.log('❌ [Profile] Pas d\'ID utilisateur disponible');
       return;
     }
-    
+
     try {
-      console.log('📖 [Profile] Chargement du profil utilisateur pour ID:', user.id);
-      const profile = await ProfileService.getUserProfile(user.id);
-      console.log('📋 [Profile] Profil récupéré depuis la base:', profile);
-      console.log('🔍 [Profile] Vérification astro_data:', profile?.astro_data);
-      console.log('🔍 [Profile] Type de astro_data:', typeof profile?.astro_data);
-      if (profile?.astro_data) {
-        console.log('🌟 [Profile] Contenu astro_data.sun:', profile.astro_data.sun);
-        console.log('🌙 [Profile] Contenu astro_data.moon:', profile.astro_data.moon);
-        console.log('🏠 [Profile] Contenu astro_data.houseSystem:', profile.astro_data.houseSystem);
+      console.log('🔍 [Profile] loadProfileData DÉBUT', backgroundRefresh ? '(background refresh)' : '');
+      
+      if (!backgroundRefresh) {
+        setIsLoading(true);
+        setProfileLoading(true);
       }
-      setUserProfile(profile);
-      console.log('✅ [Profile] État du profil mis à jour:', profile);
+
+      // Charger le profil et le nombre de thèmes en parallèle
+      const [profile, chartsResponse] = await Promise.all([
+        ProfileService.getUserProfile(user.id),
+        userAPI.getSavedCharts()
+      ]);
+
+      console.log('📊 [Profile] Données reçues:');
+      console.log('  - profile:', profile);
+      console.log('  - chartsResponse:', chartsResponse);
+
+      // Mettre à jour les états
+      if (profile) {
+        setUserProfile(profile);
+        console.log('✅ [Profile] Profil chargé:', profile);
+      }
+
+      if (chartsResponse.success && chartsResponse.data) {
+        const count = chartsResponse.data.length;
+        setChartsCount(count);
+        console.log('✅ [Profile] Nombre de thèmes chargé:', count);
+      }
+
+      // Sauvegarder dans le cache
+      saveToCache(profile, chartsResponse.success && chartsResponse.data ? chartsResponse.data.length : 0);
+
     } catch (error) {
-      console.error('❌ [Profile] Erreur lors du chargement du profil:', error);
+      console.error('❌ [Profile] Erreur dans loadProfileData:', error);
     } finally {
-      setProfileLoading(false);
+      if (!backgroundRefresh) {
+        console.log('🏁 [Profile] loadProfileData FIN - isLoading: false');
+        setIsLoading(false);
+        setProfileLoading(false);
+      }
     }
   };
 
@@ -204,7 +298,10 @@ const Profile: React.FC = () => {
                       variant="ghost" 
                       size="sm"
                       className="p-2"
-                      onClick={() => navigate('/onboarding')}
+                      onClick={() => {
+                        clearCache();
+                        navigate('/onboarding');
+                      }}
                     >
                       <Edit className="h-4 w-4" />
                     </Button>
@@ -448,7 +545,10 @@ const Profile: React.FC = () => {
             <div className="mt-8 flex justify-center">
               <Button
                 variant="outline"
-                onClick={logout}
+                onClick={() => {
+                  clearCache();
+                  logout();
+                }}
                 className="flex items-center space-x-2 text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300"
               >
                 <LogOut className="w-4 h-4" />

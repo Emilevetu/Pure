@@ -49,10 +49,75 @@ const Friends: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [isAddFriendOpen, setIsAddFriendOpen] = useState(false);
 
+  // Cache configuration
+  const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+  const CACHE_KEYS = {
+    friends: 'friends_cache',
+    requestsReceived: 'requests_received_cache',
+    requestsSent: 'requests_sent_cache',
+    timestamp: 'friends_cache_timestamp'
+  };
+
+  // Cache functions
+  const isCacheValid = (): boolean => {
+    const timestamp = localStorage.getItem(CACHE_KEYS.timestamp);
+    if (!timestamp) return false;
+    return (Date.now() - parseInt(timestamp)) < CACHE_DURATION;
+  };
+
+  const loadFromCache = (): boolean => {
+    if (!isCacheValid()) return false;
+    
+    try {
+      const cachedFriends = localStorage.getItem(CACHE_KEYS.friends);
+      const cachedRequestsReceived = localStorage.getItem(CACHE_KEYS.requestsReceived);
+      const cachedRequestsSent = localStorage.getItem(CACHE_KEYS.requestsSent);
+      
+      if (cachedFriends) setFriends(JSON.parse(cachedFriends));
+      if (cachedRequestsReceived) setRequestsReceived(JSON.parse(cachedRequestsReceived));
+      if (cachedRequestsSent) setRequestsSent(JSON.parse(cachedRequestsSent));
+      
+      console.log('✅ [Friends] Données chargées depuis le cache');
+      return true;
+    } catch (error) {
+      console.error('❌ [Friends] Erreur lors du chargement du cache:', error);
+      return false;
+    }
+  };
+
+  const saveToCache = (friendsData: Friend[], requestsReceivedData: FriendRequest[], requestsSentData: FriendRequest[]) => {
+    try {
+      localStorage.setItem(CACHE_KEYS.friends, JSON.stringify(friendsData));
+      localStorage.setItem(CACHE_KEYS.requestsReceived, JSON.stringify(requestsReceivedData));
+      localStorage.setItem(CACHE_KEYS.requestsSent, JSON.stringify(requestsSentData));
+      localStorage.setItem(CACHE_KEYS.timestamp, Date.now().toString());
+      console.log('💾 [Friends] Données sauvegardées dans le cache');
+    } catch (error) {
+      console.error('❌ [Friends] Erreur lors de la sauvegarde du cache:', error);
+    }
+  };
+
+  const clearCache = () => {
+    localStorage.removeItem(CACHE_KEYS.friends);
+    localStorage.removeItem(CACHE_KEYS.requestsReceived);
+    localStorage.removeItem(CACHE_KEYS.requestsSent);
+    localStorage.removeItem(CACHE_KEYS.timestamp);
+    console.log('🗑️ [Friends] Cache vidé');
+  };
+
   useEffect(() => {
     if (user) {
       console.log('🔍 [Friends] useEffect - user trouvé, chargement des données');
-      loadFriendsData();
+      
+      // Essayer de charger depuis le cache d'abord
+      if (loadFromCache()) {
+        setIsLoading(false);
+        // Charger en arrière-plan pour mettre à jour le cache
+        loadFriendsData(true);
+      } else {
+        // Pas de cache valide, charger normalement
+        loadFriendsData();
+      }
     } else {
       console.log('🔍 [Friends] useEffect - pas de user, pas de chargement');
     }
@@ -71,11 +136,14 @@ const Friends: React.FC = () => {
     return () => clearTimeout(timeoutId);
   }, [isLoading]);
 
-  const loadFriendsData = async () => {
+  const loadFriendsData = async (backgroundRefresh = false) => {
     try {
-      console.log('🔍 [Friends] loadFriendsData DÉBUT');
-      setIsLoading(true);
-      setError(null);
+      console.log('🔍 [Friends] loadFriendsData DÉBUT', backgroundRefresh ? '(background refresh)' : '');
+      
+      if (!backgroundRefresh) {
+        setIsLoading(true);
+        setError(null);
+      }
 
       console.log('🔍 [Friends] Appel des APIs...');
       const [friendsResponse, requestsReceivedResponse, requestsSentResponse] = await Promise.all([
@@ -89,38 +157,52 @@ const Friends: React.FC = () => {
       console.log('  - requestsReceivedResponse:', requestsReceivedResponse);
       console.log('  - requestsSentResponse:', requestsSentResponse);
 
+      const friendsData = friendsResponse.success ? (friendsResponse.data || []) : [];
+      const requestsReceivedData = requestsReceivedResponse.success ? (requestsReceivedResponse.data || []) : [];
+      const requestsSentData = requestsSentResponse.success ? (requestsSentResponse.data || []) : [];
+
+      // Mettre à jour les états
       if (friendsResponse.success) {
-        setFriends(friendsResponse.data || []);
-        console.log('✅ [Friends] Amis chargés:', friendsResponse.data?.length || 0);
+        setFriends(friendsData);
+        console.log('✅ [Friends] Amis chargés:', friendsData.length);
       } else {
         console.log('❌ [Friends] Erreur getFriends:', friendsResponse.error);
       }
 
       if (requestsReceivedResponse.success) {
-        setRequestsReceived(requestsReceivedResponse.data || []);
-        console.log('✅ [Friends] Demandes reçues chargées:', requestsReceivedResponse.data?.length || 0);
+        setRequestsReceived(requestsReceivedData);
+        console.log('✅ [Friends] Demandes reçues chargées:', requestsReceivedData.length);
       } else {
         console.log('❌ [Friends] Erreur getFriendRequestsReceived:', requestsReceivedResponse.error);
       }
 
       if (requestsSentResponse.success) {
-        setRequestsSent(requestsSentResponse.data || []);
-        console.log('✅ [Friends] Demandes envoyées chargées:', requestsSentResponse.data?.length || 0);
+        setRequestsSent(requestsSentData);
+        console.log('✅ [Friends] Demandes envoyées chargées:', requestsSentData.length);
       } else {
         console.log('❌ [Friends] Erreur getFriendRequestsSent:', requestsSentResponse.error);
       }
 
+      // Sauvegarder dans le cache
+      saveToCache(friendsData, requestsReceivedData, requestsSentData);
+
       // Vérifier s'il y a des erreurs
       if (!friendsResponse.success || !requestsReceivedResponse.success || !requestsSentResponse.success) {
         console.log('⚠️ [Friends] Certaines APIs ont échoué, mais on continue');
-        setError('Certaines données n\'ont pas pu être chargées');
+        if (!backgroundRefresh) {
+          setError('Certaines données n\'ont pas pu être chargées');
+        }
       }
     } catch (error: any) {
       console.error('❌ [Friends] Erreur dans loadFriendsData:', error);
-      setError(error.message || 'Erreur lors du chargement');
+      if (!backgroundRefresh) {
+        setError(error.message || 'Erreur lors du chargement');
+      }
     } finally {
-      console.log('🏁 [Friends] loadFriendsData FIN - isLoading: false');
-      setIsLoading(false);
+      if (!backgroundRefresh) {
+        console.log('🏁 [Friends] loadFriendsData FIN - isLoading: false');
+        setIsLoading(false);
+      }
     }
   };
 
@@ -128,6 +210,7 @@ const Friends: React.FC = () => {
     try {
       const response = await friendsAPI.acceptFriendRequest(friendshipId);
       if (response.success) {
+        clearCache(); // Vider le cache
         await loadFriendsData(); // Recharger les données
       } else {
         setError(response.error || 'Erreur lors de l\'acceptation');
@@ -141,6 +224,7 @@ const Friends: React.FC = () => {
     try {
       const response = await friendsAPI.rejectFriendRequest(friendshipId);
       if (response.success) {
+        clearCache(); // Vider le cache
         await loadFriendsData(); // Recharger les données
       } else {
         setError(response.error || 'Erreur lors du refus');
@@ -154,6 +238,7 @@ const Friends: React.FC = () => {
     try {
       const response = await friendsAPI.removeFriend(friendshipId);
       if (response.success) {
+        clearCache(); // Vider le cache
         await loadFriendsData(); // Recharger les données
       } else {
         setError(response.error || 'Erreur lors de la suppression');
@@ -198,7 +283,31 @@ const Friends: React.FC = () => {
             {/* Stories des amis - Style Instagram */}
             {friends.length > 0 && (
               <div className="mb-8">
-                <div className="flex overflow-x-auto space-x-4 pb-2 scrollbar-hide">
+                {/* En-tête style Instagram */}
+                <div className="mb-3">
+                  <h2 className="text-black text-lg font-bold tracking-tight px-4">Mes proches</h2>
+                  {/* Trait aligné avec les bulles */}
+                  <div className="px-4">
+                    <div className="h-px bg-gray-600 mt-2"></div>
+                  </div>
+                </div>
+                
+                {/* Stories */}
+                <div className="flex overflow-x-auto space-x-4 pb-2 scrollbar-hide px-4">
+                  {/* Bulle "Ajouter un ami" */}
+                  <div className="flex flex-col items-center space-y-2 flex-shrink-0">
+                    <div 
+                      className="w-16 h-16 rounded-full bg-gray-50 border-2 border-dashed border-muted-foreground flex items-center justify-center cursor-pointer hover:scale-105 transition-transform hover:bg-gray-100"
+                      onClick={() => setIsAddFriendOpen(true)}
+                    >
+                      <span className="text-muted-foreground text-2xl font-bold leading-none">+</span>
+                    </div>
+                    <span className="text-xs text-center text-black max-w-16 truncate">
+                      Nouvel ami
+                    </span>
+                  </div>
+                  
+                  {/* Bulles des amis */}
                   {friends.map((friend) => (
                     <div key={friend.friend_id} className="flex flex-col items-center space-y-2 flex-shrink-0">
                       <div className="w-16 h-16 rounded-full bg-black border-2 border-gray-300 flex items-center justify-center cursor-pointer hover:scale-105 transition-transform">
@@ -215,15 +324,48 @@ const Friends: React.FC = () => {
               </div>
             )}
 
-            {/* En-tête */}
-            <div className="text-center space-y-4">
-              <div className="flex items-center justify-center space-x-3">
-                <Users className="h-8 w-8 text-primary" />
-                <h1 className="text-4xl font-bold">Mes Amis</h1>
+            {/* Boutons d'action style Headspace */}
+            <div className="space-y-4">
+              {/* Bouton Compatibilité */}
+              <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-blue-600 to-blue-700 p-3 cursor-pointer hover:scale-[1.02] transition-transform duration-200 shadow-lg">
+                <div className="flex items-center justify-between">
+                  <div className="flex-1">
+                    <h3 className="text-white text-lg font-semibold">
+                      Compatibilité avec un proche
+                    </h3>
+                  </div>
+                  <div className="relative w-20 h-20 flex-shrink-0">
+                    {/* Illustration abstraite style Headspace */}
+                    <div className="absolute inset-0">
+                      <div className="absolute top-2 right-2 w-8 h-8 bg-blue-300 rounded-full opacity-80"></div>
+                      <div className="absolute bottom-4 right-4 w-12 h-12 bg-gradient-to-br from-blue-200 to-blue-400 rounded-full opacity-60"></div>
+                      <div className="absolute top-6 left-2 w-6 h-6 bg-white rounded-full opacity-40"></div>
+                      <div className="absolute bottom-2 left-4 w-4 h-4 bg-blue-200 rounded-full opacity-70"></div>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <p className="text-muted-foreground text-lg">
-                Connectez-vous avec vos proches et partagez vos expériences astrologiques
-              </p>
+
+              {/* Bouton Apprendre à connaître */}
+              <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-amber-400 to-orange-500 p-3 cursor-pointer hover:scale-[1.02] transition-transform duration-200 shadow-lg">
+                <div className="flex items-center justify-between">
+                  <div className="flex-1">
+                    <h3 className="text-gray-800 text-lg font-semibold">
+                      Apprendre à connaître un proche
+                    </h3>
+                  </div>
+                  <div className="relative w-20 h-20 flex-shrink-0">
+                    {/* Illustration abstraite style Headspace */}
+                    <div className="absolute inset-0">
+                      <div className="absolute top-3 right-3 w-10 h-10 bg-orange-200 rounded-full opacity-80"></div>
+                      <div className="absolute bottom-3 right-2 w-8 h-8 bg-yellow-300 rounded-full opacity-70"></div>
+                      <div className="absolute top-1 left-3 w-6 h-6 bg-white rounded-full opacity-50"></div>
+                      <div className="absolute bottom-1 left-1 w-4 h-4 bg-orange-300 rounded-full opacity-60"></div>
+                      <div className="absolute top-8 left-6 w-3 h-3 bg-yellow-200 rounded-full opacity-80"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
 
             {/* Erreur */}
@@ -234,13 +376,6 @@ const Friends: React.FC = () => {
               </Alert>
             )}
 
-            {/* Bouton d'ajout d'ami */}
-            <div className="flex justify-center">
-              <Button onClick={() => setIsAddFriendOpen(true)} size="lg">
-                <UserPlus className="mr-2 h-5 w-5" />
-                Ajouter un ami
-              </Button>
-            </div>
 
             {/* Onglets */}
             <Tabs defaultValue="friends" className="w-full">
@@ -400,7 +535,10 @@ const Friends: React.FC = () => {
       <AddFriendDialog 
         open={isAddFriendOpen} 
         onOpenChange={setIsAddFriendOpen}
-        onFriendAdded={loadFriendsData}
+        onFriendAdded={() => {
+          clearCache();
+          loadFriendsData();
+        }}
       />
     </AuthGuard>
   );
