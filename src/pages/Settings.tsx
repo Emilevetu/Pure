@@ -121,16 +121,13 @@ const Settings: React.FC = () => {
 
   return (
     <AuthGuard>
-      <div className="min-h-screen bg-gradient-to-br from-background to-muted/20">
-        <div className="container mx-auto px-4 py-8">
+      <div className="min-h-screen bg-dark-blue">
+        <div className="container mx-auto px-4 py-8 pb-24">
           <div className="max-w-4xl mx-auto space-y-6">
             
             {/* En-tête */}
-            <div className="text-center space-y-2">
-              <h1 className="text-3xl font-bold">Paramètres du compte</h1>
-              <p className="text-muted-foreground">
-                Gérez vos informations personnelles et les paramètres de votre compte
-              </p>
+            <div className="text-center">
+              <h1 className="text-3xl font-bold text-white">Paramètres du compte</h1>
             </div>
 
             {/* Message de statut */}
@@ -143,121 +140,68 @@ const Settings: React.FC = () => {
               </Alert>
             )}
 
-            <div className="grid gap-6 md:grid-cols-2">
-              
-              {/* Informations du profil */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
-                    <User className="h-5 w-5" />
-                    <span>Informations du profil</span>
-                  </CardTitle>
-                  <CardDescription>
-                    Modifiez vos informations personnelles
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="name">Nom complet</Label>
-                    <Input
-                      id="name"
-                      value={profileData.name}
-                      onChange={(e) => setProfileData(prev => ({ ...prev, name: e.target.value }))}
-                      placeholder="Votre nom complet"
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
-                    <Input
-                      id="email"
-                      value={profileData.email}
-                      disabled
-                      className="bg-muted"
-                    />
-                    <p className="text-xs text-muted-foreground">
-                      L'email ne peut pas être modifié
-                    </p>
-                  </div>
-
-                  <Button 
-                    onClick={handleSaveProfile} 
-                    disabled={isLoading}
-                    className="w-full"
-                  >
-                    {isLoading ? (
-                      <>
-                        <Save className="mr-2 h-4 w-4 animate-spin" />
-                        Sauvegarde...
-                      </>
-                    ) : (
-                      <>
-                        <Save className="mr-2 h-4 w-4" />
-                        Sauvegarder les modifications
-                      </>
-                    )}
-                  </Button>
-                </CardContent>
-              </Card>
-
-              {/* Informations du compte */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
-                    <Shield className="h-5 w-5" />
-                    <span>Informations du compte</span>
-                  </CardTitle>
-                  <CardDescription>
-                    Détails de votre compte Pure
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center space-x-3">
-                    <Mail className="h-4 w-4 text-muted-foreground" />
-                    <div>
-                      <p className="text-sm font-medium">Email</p>
-                      <p className="text-sm text-muted-foreground">{user?.email}</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center space-x-3">
-                    <Calendar className="h-4 w-4 text-muted-foreground" />
-                    <div>
-                      <p className="text-sm font-medium">Membre depuis</p>
-                      <p className="text-sm text-muted-foreground">
-                        {user?.createdAt ? new Date(user.createdAt).toLocaleDateString('fr-FR') : 'N/A'}
-                      </p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center space-x-3">
-                    <Database className="h-4 w-4 text-muted-foreground" />
-                    <div>
-                      <p className="text-sm font-medium">ID du compte</p>
-                      <p className="text-sm text-muted-foreground font-mono">
-                        {user?.id ? `${user.id.slice(0, 8)}...` : 'N/A'}
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Zone de danger */}
-            <Card className="border-red-200">
+            {/* Informations du profil */}
+            <Card className="bg-dark-blue border-gray-600">
               <CardHeader>
-                <CardTitle className="flex items-center space-x-2 text-red-600">
-                  <AlertTriangle className="h-5 w-5" />
-                  <span>Zone de danger</span>
+                <CardTitle className="flex items-center space-x-2 text-white">
+                  <User className="h-5 w-5" />
+                  <span>Informations du profil</span>
                 </CardTitle>
-                <CardDescription>
-                  Actions irréversibles pour votre compte
+                <CardDescription className="text-gray-300">
+                  Modifiez vos informations personnelles
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <h4 className="font-medium text-red-600">Supprimer le compte</h4>
-                  <p className="text-sm text-muted-foreground">
+                  <Label htmlFor="name" className="text-white">Nom complet</Label>
+                  <Input
+                    id="name"
+                    value={profileData.name}
+                    onChange={(e) => setProfileData(prev => ({ ...prev, name: e.target.value }))}
+                    placeholder="Votre nom complet"
+                    className="bg-gray-800 border-gray-600 text-white placeholder-gray-400"
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="email" className="text-white">Email</Label>
+                  <Input
+                    id="email"
+                    value={profileData.email}
+                    disabled
+                    className="bg-gray-800 border-gray-600 text-white"
+                  />
+                  <p className="text-xs text-gray-400">
+                    L'email ne peut pas être modifié
+                  </p>
+                </div>
+
+                <Button 
+                  onClick={handleSaveProfile} 
+                  disabled={isLoading}
+                  className="w-full bg-white text-dark-blue hover:bg-gray-100"
+                >
+                  {isLoading ? (
+                    <>
+                      <Save className="mr-2 h-4 w-4 animate-spin" />
+                      Sauvegarde...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="mr-2 h-4 w-4" />
+                      Sauvegarder les modifications
+                    </>
+                  )}
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Zone de danger */}
+            <Card className="bg-dark-blue border-red-500">
+              <CardContent className="pt-0 space-y-4">
+                <div className="space-y-2">
+                  <h4 className="font-medium text-red-400">Supprimer le compte</h4>
+                  <p className="text-sm text-gray-300">
                     Cette action supprimera définitivement votre compte, tous vos thèmes astraux 
                     et toutes vos données. Cette action est irréversible.
                   </p>
@@ -265,7 +209,7 @@ const Settings: React.FC = () => {
 
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
-                    <Button variant="destructive" className="w-full">
+                    <Button variant="destructive" className="w-full bg-red-600 hover:bg-red-700 text-white">
                       <Trash2 className="mr-2 h-4 w-4" />
                       Supprimer mon compte
                     </Button>
@@ -316,12 +260,12 @@ const Settings: React.FC = () => {
             </Card>
 
             {/* Bouton de déconnexion */}
-            <Card>
+            <Card className="bg-dark-blue border-gray-600">
               <CardContent className="pt-6">
                 <Button 
                   variant="outline" 
                   onClick={logout}
-                  className="w-full"
+                  className="w-full border-gray-600 text-black hover:bg-gray-700 hover:text-white"
                 >
                   <LogOut className="mr-2 h-4 w-4" />
                   Se déconnecter

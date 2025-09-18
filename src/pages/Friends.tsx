@@ -17,7 +17,8 @@ import {
   Clock,
   Loader2,
   AlertCircle,
-  Heart
+  Heart,
+  Bell
 } from 'lucide-react';
 import { AddFriendDialog } from '@/components/friends/AddFriendDialog';
 
@@ -48,6 +49,7 @@ const Friends: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isAddFriendOpen, setIsAddFriendOpen] = useState(false);
+  const [isNotificationOverlayOpen, setIsNotificationOverlayOpen] = useState(false);
 
   // Cache configuration
   const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
@@ -259,13 +261,13 @@ const Friends: React.FC = () => {
   if (isLoading) {
     return (
       <AuthGuard>
-        <div className="min-h-screen bg-gradient-to-br from-background to-muted/20 pt-2">
+        <div className="min-h-screen bg-dark-blue pt-2">
           <div className="container mx-auto px-6 py-8 pb-24">
             <div className="max-w-4xl mx-auto">
               <div className="flex items-center justify-center py-20">
                 <div className="flex flex-col items-center space-y-4">
                   <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                  <p className="text-muted-foreground">Chargement de vos amis...</p>
+                  <p className="text-gray-300">Chargement de vos amis...</p>
                 </div>
               </div>
             </div>
@@ -277,7 +279,7 @@ const Friends: React.FC = () => {
 
   return (
     <AuthGuard>
-      <div className="min-h-screen bg-gradient-to-br from-background to-muted/20 pt-2">
+      <div className="min-h-screen bg-dark-blue pt-2">
         <div className="container mx-auto px-6 py-8 pb-24">
           <div className="max-w-4xl mx-auto space-y-8">
             {/* Stories des amis - Style Instagram */}
@@ -285,7 +287,20 @@ const Friends: React.FC = () => {
               <div className="mb-8">
                 {/* En-tête style Instagram */}
                 <div className="mb-3">
-                  <h2 className="text-black text-lg font-bold tracking-tight px-4">Mes proches</h2>
+                  <div className="flex items-center justify-between px-4">
+                    <h2 className="text-white text-lg font-bold tracking-tight">Mes proches</h2>
+                    {/* Cloche de notifications */}
+                    <div className="relative -mt-1 -mr-2">
+                      <Bell 
+                        className="w-5 h-5 text-gray-300 cursor-pointer hover:text-white transition-colors" 
+                        onClick={() => setIsNotificationOverlayOpen(true)}
+                      />
+                      {/* Point de notification (optionnel) */}
+                      {requestsReceived.length > 0 && (
+                        <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></div>
+                      )}
+                    </div>
+                  </div>
                   {/* Trait aligné avec les bulles */}
                   <div className="px-4">
                     <div className="h-px bg-gray-600 mt-2"></div>
@@ -302,7 +317,7 @@ const Friends: React.FC = () => {
                     >
                       <span className="text-muted-foreground text-2xl font-bold leading-none">+</span>
                     </div>
-                    <span className="text-xs text-center text-black max-w-16 truncate">
+                    <span className="text-xs text-center text-white max-w-16 truncate">
                       Nouvel ami
                     </span>
                   </div>
@@ -315,7 +330,7 @@ const Friends: React.FC = () => {
                           {friend.friend_name.charAt(0).toUpperCase()}
                         </span>
                       </div>
-                      <span className="text-xs text-center text-black max-w-16 truncate">
+                      <span className="text-xs text-center text-white max-w-16 truncate">
                         {friend.friend_name}
                       </span>
                     </div>
@@ -375,158 +390,6 @@ const Friends: React.FC = () => {
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
-
-
-            {/* Onglets */}
-            <Tabs defaultValue="friends" className="w-full">
-              <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="friends" className="flex items-center space-x-2">
-                  <Users className="h-4 w-4" />
-                  <span>Amis ({friends.length})</span>
-                </TabsTrigger>
-                <TabsTrigger value="received" className="flex items-center space-x-2">
-                  <Mail className="h-4 w-4" />
-                  <span>Reçues ({requestsReceived.length})</span>
-                </TabsTrigger>
-                <TabsTrigger value="sent" className="flex items-center space-x-2">
-                  <Clock className="h-4 w-4" />
-                  <span>Envoyées ({requestsSent.length})</span>
-                </TabsTrigger>
-              </TabsList>
-
-              {/* Onglet Amis */}
-              <TabsContent value="friends" className="space-y-4">
-                {friends.length === 0 ? (
-                  <Card>
-                    <CardContent className="flex flex-col items-center justify-center py-12">
-                      <Heart className="h-12 w-12 text-muted-foreground mb-4" />
-                      <h3 className="text-lg font-semibold mb-2">Aucun ami pour le moment</h3>
-                      <p className="text-muted-foreground text-center mb-4">
-                        Commencez par ajouter des amis pour partager vos thèmes astraux
-                      </p>
-                      <Button onClick={() => setIsAddFriendOpen(true)}>
-                        <UserPlus className="mr-2 h-4 w-4" />
-                        Ajouter un ami
-                      </Button>
-                    </CardContent>
-                  </Card>
-                ) : (
-                  <div className="grid gap-4 md:grid-cols-2">
-                    {friends.map((friend) => (
-                      <Card key={friend.friendship_id}>
-                        <CardHeader className="pb-3">
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <CardTitle className="text-lg">{friend.friend_name}</CardTitle>
-                              <CardDescription>{friend.friend_email}</CardDescription>
-                            </div>
-                            <Badge variant="secondary">Ami</Badge>
-                          </div>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="flex items-center justify-between">
-                            <p className="text-sm text-muted-foreground">
-                              Amis depuis le {formatDate(friend.created_at)}
-                            </p>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleRemoveFriend(friend.friendship_id)}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                )}
-              </TabsContent>
-
-              {/* Onglet Demandes reçues */}
-              <TabsContent value="received" className="space-y-4">
-                {requestsReceived.length === 0 ? (
-                  <Card>
-                    <CardContent className="flex flex-col items-center justify-center py-12">
-                      <Mail className="h-12 w-12 text-muted-foreground mb-4" />
-                      <h3 className="text-lg font-semibold mb-2">Aucune demande reçue</h3>
-                      <p className="text-muted-foreground text-center">
-                        Les demandes d'amitié que vous recevez apparaîtront ici
-                      </p>
-                    </CardContent>
-                  </Card>
-                ) : (
-                  <div className="grid gap-4">
-                    {requestsReceived.map((request) => (
-                      <Card key={request.friendship_id}>
-                        <CardContent className="pt-6">
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <h3 className="font-semibold">{request.requester_name}</h3>
-                              <p className="text-sm text-muted-foreground">{request.requester_email}</p>
-                              <p className="text-xs text-muted-foreground mt-1">
-                                Demande reçue le {formatDate(request.created_at)}
-                              </p>
-                            </div>
-                            <div className="flex space-x-2">
-                              <Button
-                                size="sm"
-                                onClick={() => handleAcceptRequest(request.friendship_id)}
-                              >
-                                <Check className="h-4 w-4 mr-1" />
-                                Accepter
-                              </Button>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleDeclineRequest(request.friendship_id)}
-                              >
-                                <X className="h-4 w-4 mr-1" />
-                                Refuser
-                              </Button>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                )}
-              </TabsContent>
-
-              {/* Onglet Demandes envoyées */}
-              <TabsContent value="sent" className="space-y-4">
-                {requestsSent.length === 0 ? (
-                  <Card>
-                    <CardContent className="flex flex-col items-center justify-center py-12">
-                      <Clock className="h-12 w-12 text-muted-foreground mb-4" />
-                      <h3 className="text-lg font-semibold mb-2">Aucune demande envoyée</h3>
-                      <p className="text-muted-foreground text-center">
-                        Les demandes d'amitié que vous envoyez apparaîtront ici
-                      </p>
-                    </CardContent>
-                  </Card>
-                ) : (
-                  <div className="grid gap-4">
-                    {requestsSent.map((request) => (
-                      <Card key={request.friendship_id}>
-                        <CardContent className="pt-6">
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <h3 className="font-semibold">{request.addressee_name}</h3>
-                              <p className="text-sm text-muted-foreground">{request.addressee_email}</p>
-                              <p className="text-xs text-muted-foreground mt-1">
-                                Demande envoyée le {formatDate(request.created_at)}
-                              </p>
-                            </div>
-                            <Badge variant="outline">En attente</Badge>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                )}
-              </TabsContent>
-            </Tabs>
           </div>
         </div>
       </div>
@@ -540,6 +403,149 @@ const Friends: React.FC = () => {
           loadFriendsData();
         }}
       />
+
+      {/* Overlay de notifications */}
+      {isNotificationOverlayOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+          onClick={() => setIsNotificationOverlayOpen(false)}
+        >
+          <div 
+            className="bg-white rounded-2xl w-full max-w-md max-h-[80vh] overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* En-tête avec titre et croix */}
+            <div className="flex items-center justify-between p-6 border-b">
+              <h2 className="text-xl font-bold text-black">Notifications</h2>
+              <button
+                onClick={() => setIsNotificationOverlayOpen(false)}
+                className="text-gray-500 hover:text-gray-700 transition-colors"
+              >
+                <X className="h-6 w-6" />
+              </button>
+            </div>
+
+            {/* Contenu avec onglets */}
+            <div className="p-6">
+              <Tabs defaultValue="friends" className="w-full">
+                <TabsList className="grid w-full grid-cols-3 mb-4">
+                  <TabsTrigger value="friends" className="flex items-center space-x-2">
+                    <Users className="h-4 w-4" />
+                    <span>Amis ({friends.length})</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="received" className="flex items-center space-x-2">
+                    <Mail className="h-4 w-4" />
+                    <span>Reçues ({requestsReceived.length})</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="sent" className="flex items-center space-x-2">
+                    <Clock className="h-4 w-4" />
+                    <span>Envoyées ({requestsSent.length})</span>
+                  </TabsTrigger>
+                </TabsList>
+
+                {/* Onglet Amis */}
+                <TabsContent value="friends" className="space-y-3">
+                  {friends.length === 0 ? (
+                    <div className="text-center py-8">
+                      <Heart className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                      <p className="text-muted-foreground text-sm">Aucun ami pour le moment</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-3 max-h-60 overflow-y-auto">
+                      {friends.map((friend) => (
+                        <div key={friend.friendship_id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                          <div>
+                            <h3 className="font-semibold text-sm">{friend.friend_name}</h3>
+                            <p className="text-xs text-muted-foreground">{friend.friend_email}</p>
+                            <p className="text-xs text-muted-foreground">
+                              Amis depuis le {formatDate(friend.created_at)}
+                            </p>
+                          </div>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleRemoveFriend(friend.friendship_id)}
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </TabsContent>
+
+                {/* Onglet Demandes reçues */}
+                <TabsContent value="received" className="space-y-3">
+                  {requestsReceived.length === 0 ? (
+                    <div className="text-center py-8">
+                      <Mail className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                      <p className="text-muted-foreground text-sm">Aucune demande reçue</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-3 max-h-60 overflow-y-auto">
+                      {requestsReceived.map((request) => (
+                        <div key={request.friendship_id} className="p-3 bg-gray-50 rounded-lg">
+                          <div className="mb-3">
+                            <h3 className="font-semibold text-sm">{request.requester_name}</h3>
+                            <p className="text-xs text-muted-foreground">{request.requester_email}</p>
+                            <p className="text-xs text-muted-foreground">
+                              Demande reçue le {formatDate(request.created_at)}
+                            </p>
+                          </div>
+                          <div className="flex space-x-2">
+                            <Button
+                              size="sm"
+                              className="flex-1"
+                              onClick={() => handleAcceptRequest(request.friendship_id)}
+                            >
+                              <Check className="h-3 w-3 mr-1" />
+                              Accepter
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="flex-1"
+                              onClick={() => handleDeclineRequest(request.friendship_id)}
+                            >
+                              <X className="h-3 w-3 mr-1" />
+                              Refuser
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </TabsContent>
+
+                {/* Onglet Demandes envoyées */}
+                <TabsContent value="sent" className="space-y-3">
+                  {requestsSent.length === 0 ? (
+                    <div className="text-center py-8">
+                      <Clock className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                      <p className="text-muted-foreground text-sm">Aucune demande envoyée</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-3 max-h-60 overflow-y-auto">
+                      {requestsSent.map((request) => (
+                        <div key={request.friendship_id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                          <div>
+                            <h3 className="font-semibold text-sm">{request.addressee_name}</h3>
+                            <p className="text-xs text-muted-foreground">{request.addressee_email}</p>
+                            <p className="text-xs text-muted-foreground">
+                              Demande envoyée le {formatDate(request.created_at)}
+                            </p>
+                          </div>
+                          <Badge variant="outline" className="text-xs">En attente</Badge>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </TabsContent>
+              </Tabs>
+            </div>
+          </div>
+        </div>
+      )}
     </AuthGuard>
   );
 };
