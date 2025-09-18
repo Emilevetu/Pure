@@ -21,6 +21,7 @@ import {
   Bell
 } from 'lucide-react';
 import { AddFriendDialog } from '@/components/friends/AddFriendDialog';
+import { useFriendsRealtime } from '@/hooks/useFriendsRealtime';
 
 interface Friend {
   friend_id: string;
@@ -50,6 +51,16 @@ const Friends: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [isAddFriendOpen, setIsAddFriendOpen] = useState(false);
   const [isNotificationOverlayOpen, setIsNotificationOverlayOpen] = useState(false);
+
+  // 🚀 Gestion des mises à jour en temps réel
+  const handleFriendsRealtimeUpdate = () => {
+    console.log('🔔 [Friends] Mise à jour en temps réel détectée - invalidation du cache');
+    clearCache();
+    loadFriendsData();
+  };
+
+  // Hook pour écouter les changements en temps réel sur la table friends
+  useFriendsRealtime(handleFriendsRealtimeUpdate);
 
   // Cache configuration
   const CACHE_DURATION = 30 * 60 * 1000; // 30 minutes (optimisé vs 5 min)
