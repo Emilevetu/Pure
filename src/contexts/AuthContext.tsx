@@ -70,6 +70,37 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const lastHandledUserId = useRef<string | null>(null);
   const profileEnsuredForUserId = useRef<string | null>(null);
 
+  // Fonction pour récupérer les données utilisateur depuis la base de données
+  const getUserFromDatabase = async (userId: string): Promise<Partial<User>> => {
+    try {
+      const { data, error } = await supabase
+        .from('users')
+        .select('id, email, name, created_at')
+        .eq('id', userId)
+        .maybeSingle();
+
+      if (error) {
+        console.error('❌ Erreur récupération utilisateur DB:', error);
+        return {};
+      }
+
+      if (data) {
+        return {
+          id: data.id,
+          email: data.email,
+          name: data.name,
+          createdAt: data.created_at,
+          updatedAt: new Date().toISOString(),
+        };
+      }
+
+      return {};
+    } catch (error) {
+      console.error('❌ Erreur getUserFromDatabase:', error);
+      return {};
+    }
+  };
+
   // Initialisation au chargement de l'application
   useEffect(() => {
     console.log('🔍 AuthContext: Initialisation Supabase...');
@@ -87,21 +118,36 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       if (session?.user) {
         console.log('✅ Profil chargé:', session.user.email);
-        // Création synchrone de l'utilisateur
-        const user: User = {
-          id: session.user.id,
-          email: session.user.email!,
-          name: session.user.user_metadata?.name || session.user.email!.split('@')[0],
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
+        
+        // 🚀 SOLUTION COMPLÈTE: Récupération depuis la base de données
+        const createUserFromSession = async () => {
+          // Tenter de récupérer les données depuis la DB
+          const dbUserData = await getUserFromDatabase(session.user.id);
+          
+          // Utiliser les données DB si disponibles, sinon fallback sur session
+          const user: User = {
+            id: session.user.id,
+            email: session.user.email!,
+            name: dbUserData.name || session.user.user_metadata?.name || session.user.email!.split('@')[0],
+            createdAt: dbUserData.createdAt || new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          };
+
+          setAuthState({
+            user,
+            session,
+            isAuthenticated: true,
+            isLoading: false,
+          });
+          
+          console.log('✅ [AuthContext] Utilisateur créé avec données DB:', { 
+            fromDB: !!dbUserData.name, 
+            name: user.name 
+          });
         };
 
-        setAuthState({
-          user,
-          session,
-          isAuthenticated: true,
-          isLoading: false,
-        });
+        // Exécution asynchrone pour récupérer les données DB
+        createUserFromSession();
 
         // Assurer que le profil existe dans public.users (éviter les doublons)
         if (profileEnsuredForUserId.current !== session.user.id) {
@@ -250,20 +296,24 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  // Fonction de rafraîchissement du profil utilisateur
+  // 🚀 SOLUTION COMPLÈTE: Rafraîchissement depuis la base de données
   const refreshUser = async (): Promise<void> => {
     if (!authState.isAuthenticated) return;
 
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user) {
+        // Récupérer les données actuelles depuis la DB
+        const dbUserData = await getUserFromDatabase(session.user.id);
+        
         // Forcer la mise à jour en réinitialisant le ref
         lastHandledUserId.current = null;
+        
         const user: User = {
           id: session.user.id,
           email: session.user.email!,
-          name: session.user.user_metadata?.name || session.user.email!.split('@')[0],
-          createdAt: new Date().toISOString(),
+          name: dbUserData.name || session.user.user_metadata?.name || session.user.email!.split('@')[0],
+          createdAt: dbUserData.createdAt || new Date().toISOString(),
           updatedAt: new Date().toISOString(),
         };
 
@@ -272,6 +322,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           session,
           isAuthenticated: true,
           isLoading: false,
+        });
+        
+        console.log('✅ [AuthContext] Utilisateur rafraîchi avec données DB:', { 
+          fromDB: !!dbUserData.name, 
+          name: user.name 
         });
       }
     } catch (error) {
