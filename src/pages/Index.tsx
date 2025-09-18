@@ -22,7 +22,7 @@ const Index = () => {
             {/* Message de bienvenue */}
             <div className="mb-2 -ml-6">
               <h2 className="text-lg text-gray-200 font-light">
-                Bonjour {user?.user_metadata?.full_name || 'Utilisateur'}
+                Bonjour {user?.name || 'Utilisateur'}
               </h2>
             </div>
             

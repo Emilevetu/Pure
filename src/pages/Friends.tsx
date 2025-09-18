@@ -52,7 +52,7 @@ const Friends: React.FC = () => {
   const [isNotificationOverlayOpen, setIsNotificationOverlayOpen] = useState(false);
 
   // Cache configuration
-  const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+  const CACHE_DURATION = 30 * 60 * 1000; // 30 minutes (optimisé vs 5 min)
   const CACHE_KEYS = {
     friends: 'friends_cache',
     requestsReceived: 'requests_received_cache',
@@ -114,8 +114,7 @@ const Friends: React.FC = () => {
       // Essayer de charger depuis le cache d'abord
       if (loadFromCache()) {
         setIsLoading(false);
-        // Charger en arrière-plan pour mettre à jour le cache
-        loadFriendsData(true);
+        console.log('✅ [Friends] Données chargées depuis le cache, pas de background refresh');
       } else {
         // Pas de cache valide, charger normalement
         loadFriendsData();
@@ -210,42 +209,80 @@ const Friends: React.FC = () => {
 
   const handleAcceptRequest = async (friendshipId: string) => {
     try {
+      // 🚀 Update optimiste local - Supprimer de la liste des demandes reçues
+      const requestToAccept = requestsReceived.find(req => req.friendship_id === friendshipId);
+      if (requestToAccept) {
+        setRequestsReceived(prev => prev.filter(req => req.friendship_id !== friendshipId));
+        // Ajouter aux amis localement
+        if (requestToAccept.requester_id && requestToAccept.requester_name && requestToAccept.requester_email) {
+          const newFriend: Friend = {
+            friend_id: requestToAccept.requester_id,
+            friend_name: requestToAccept.requester_name,
+            friend_email: requestToAccept.requester_email,
+            friendship_id: friendshipId,
+            created_at: new Date().toISOString()
+          };
+          setFriends(prev => [newFriend, ...prev]);
+        }
+      }
+
       const response = await friendsAPI.acceptFriendRequest(friendshipId);
       if (response.success) {
-        clearCache(); // Vider le cache
-        await loadFriendsData(); // Recharger les données
+        // Mettre à jour le cache avec les nouvelles données locales
+        saveToCache(friends, requestsReceived, requestsSent);
+        console.log('✅ [Friends] Demande acceptée avec succès - update local effectué');
       } else {
+        // Reverter les changements optimistes en cas d'erreur
+        await loadFriendsData();
         setError(response.error || 'Erreur lors de l\'acceptation');
       }
     } catch (error: any) {
+      // Reverter les changements optimistes en cas d'erreur
+      await loadFriendsData();
       setError(error.message || 'Erreur lors de l\'acceptation');
     }
   };
 
   const handleDeclineRequest = async (friendshipId: string) => {
     try {
+      // 🚀 Update optimiste local - Supprimer de la liste des demandes reçues
+      setRequestsReceived(prev => prev.filter(req => req.friendship_id !== friendshipId));
+
       const response = await friendsAPI.rejectFriendRequest(friendshipId);
       if (response.success) {
-        clearCache(); // Vider le cache
-        await loadFriendsData(); // Recharger les données
+        // Mettre à jour le cache avec les nouvelles données locales
+        saveToCache(friends, requestsReceived, requestsSent);
+        console.log('✅ [Friends] Demande refusée avec succès - update local effectué');
       } else {
+        // Reverter les changements optimistes en cas d'erreur
+        await loadFriendsData();
         setError(response.error || 'Erreur lors du refus');
       }
     } catch (error: any) {
+      // Reverter les changements optimistes en cas d'erreur
+      await loadFriendsData();
       setError(error.message || 'Erreur lors du refus');
     }
   };
 
   const handleRemoveFriend = async (friendshipId: string) => {
     try {
+      // 🚀 Update optimiste local - Supprimer de la liste des amis
+      setFriends(prev => prev.filter(friend => friend.friendship_id !== friendshipId));
+
       const response = await friendsAPI.removeFriend(friendshipId);
       if (response.success) {
-        clearCache(); // Vider le cache
-        await loadFriendsData(); // Recharger les données
+        // Mettre à jour le cache avec les nouvelles données locales
+        saveToCache(friends, requestsReceived, requestsSent);
+        console.log('✅ [Friends] Ami supprimé avec succès - update local effectué');
       } else {
+        // Reverter les changements optimistes en cas d'erreur
+        await loadFriendsData();
         setError(response.error || 'Erreur lors de la suppression');
       }
     } catch (error: any) {
+      // Reverter les changements optimistes en cas d'erreur
+      await loadFriendsData();
       setError(error.message || 'Erreur lors de la suppression');
     }
   };
@@ -399,8 +436,8 @@ const Friends: React.FC = () => {
         open={isAddFriendOpen} 
         onOpenChange={setIsAddFriendOpen}
         onFriendAdded={() => {
-          clearCache();
-          loadFriendsData();
+          // 🚀 Update optimiste local - Pas de clearCache + loadFriendsData
+          console.log('✅ [Friends] Nouvel ami ajouté - pas de rechargement, sera mis à jour par les real-time updates');
         }}
       />
 

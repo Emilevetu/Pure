@@ -139,7 +139,7 @@ export class MicroserviceAPI {
       }
 
       if (city) {
-        console.log(`✅ [MicroserviceAPI] Ville trouvée: ${city.name} (${city.country})`);
+        console.log(`✅ [MicroserviceAPI] Ville trouvée: ${city.name}`);
         return {
           longitude: city.longitude,
           latitude: city.latitude,
@@ -149,7 +149,7 @@ export class MicroserviceAPI {
 
       // Fallback sur Paris, France
       console.log(`⚠️ [MicroserviceAPI] Ville non trouvée, utilisation de Paris comme fallback`);
-      const paris = cities.find(c => c.name === 'Paris' && c.country === 'France');
+      const paris = cities.find(c => c.name === 'Paris, France');
       if (paris) {
         return {
           longitude: paris.longitude,
@@ -190,7 +190,6 @@ export class MicroserviceAPI {
     // Utiliser le timezone réel de la ville (gère automatiquement l'heure d'été/hiver)
     const cityData: CityData = {
       name: city.name,
-      country: city.country || 'France',
       timezone: city.timezone, // ✅ Timezone réel de la ville
       longitude: coordinates.longitude,
       latitude: coordinates.latitude,
