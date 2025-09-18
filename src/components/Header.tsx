@@ -24,7 +24,7 @@ const Header = () => {
 
   return (
     <>
-      <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border/50">
+      <header className="fixed top-0 left-0 right-0 z-50 bg-dark-blue/80 backdrop-blur-md border-b border-gray-600/50">
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             {/* Logo */}
@@ -37,26 +37,26 @@ const Header = () => {
                 alt="Pure" 
                 className="h-8 w-8"
               />
-              <span className="text-xl font-semibold tracking-tight">Pure</span>
+              <span className="text-xl font-semibold tracking-tight text-white">Pure</span>
             </div>
 
             {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center space-x-8">
               <button
                 onClick={() => scrollToSection('hero')}
-                className="text-muted-foreground hover:text-foreground transition-smooth"
+                className="text-gray-300 hover:text-white transition-smooth"
               >
                 Aperçu
               </button>
               <button
                 onClick={() => scrollToSection('methode')}
-                className="text-muted-foreground hover:text-foreground transition-smooth"
+                className="text-gray-300 hover:text-white transition-smooth"
               >
                 Méthode
               </button>
               <button
                 onClick={() => scrollToSection('contact')}
-                className="text-muted-foreground hover:text-foreground transition-smooth"
+                className="text-gray-300 hover:text-white transition-smooth"
               >
                 Contact
               </button>

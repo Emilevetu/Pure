@@ -56,7 +56,9 @@ export default {
 					deep: 'hsl(var(--cosmic-deep))',
 					purple: 'hsl(var(--cosmic-purple))',
 					text: 'hsl(var(--cosmic-text))'
-				}
+				},
+				// Custom dark blue color
+				'dark-blue': '#0e1529'
 			},
 			backgroundImage: {
 				'gradient-cosmic': 'var(--gradient-cosmic)',

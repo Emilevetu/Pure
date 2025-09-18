@@ -31,7 +31,7 @@ const BottomNavigation = () => {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50">
+    <nav className="fixed bottom-0 left-0 right-0 bg-dark-blue border-t border-gray-600 z-50">
       <div className="flex justify-around items-center py-2">
         {navItems.map((item) => {
           const Icon = item.icon;
@@ -45,12 +45,12 @@ const BottomNavigation = () => {
             >
               <Icon 
                 className={`w-6 h-6 mb-1 ${
-                  active ? 'text-black' : 'text-gray-400'
+                  active ? 'text-white' : 'text-gray-400'
                 }`} 
               />
               <span 
                 className={`text-xs font-medium ${
-                  active ? 'text-black' : 'text-gray-400'
+                  active ? 'text-white' : 'text-gray-400'
                 }`}
               >
                 {item.label}
