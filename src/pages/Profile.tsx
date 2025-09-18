@@ -38,8 +38,8 @@ const Profile: React.FC = () => {
   const [profileLoading, setProfileLoading] = useState(true);
   const [astroLoading, setAstroLoading] = useState(false);
 
-  // Cache configuration
-  const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+  // Cache configuration - optimisé pour 60 minutes (données modifiées uniquement localement)
+  const CACHE_DURATION = 60 * 60 * 1000; // 60 minutes (optimisé vs 5 min)
   const CACHE_KEYS = {
     profile: 'profile_cache',
     chartsCount: 'charts_count_cache',
@@ -104,8 +104,8 @@ const Profile: React.FC = () => {
       if (loadFromCache()) {
         setIsLoading(false);
         setProfileLoading(false);
-        // Charger en arrière-plan pour mettre à jour le cache
-        loadProfileData(true);
+        // 🚀 OPTIMISATION: Plus de background refresh - cache = source unique (60 min)
+        console.log('⚡ [Profile] Cache valide utilisé - pas de background refresh');
       } else {
         // Pas de cache valide, charger normalement
         loadProfileData();
@@ -238,8 +238,13 @@ const Profile: React.FC = () => {
         place: userProfile.birth_place,
       });
       await ProfileService.updateAstroData(user.id, astro);
-      setUserProfile((prev) => (prev ? { ...prev, astro_data: astro } : prev));
-      console.log('✅ [Profile] Thème astral calculé et sauvegardé');
+      
+      // 🚀 OPTIMISATION: Update optimiste local + cache
+      const updatedProfile = { ...userProfile, astro_data: astro };
+      setUserProfile(updatedProfile);
+      saveToCache(updatedProfile, chartsCount);
+      
+      console.log('✅ [Profile] Thème astral calculé et sauvegardé - cache mis à jour');
     } catch (error) {
       console.error('❌ [Profile] Erreur lors du calcul du thème:', error);
     } finally {
@@ -297,6 +302,8 @@ const Profile: React.FC = () => {
                       size="sm"
                       className="p-2 text-white hover:bg-gray-700"
                       onClick={() => {
+                        // 🚀 OPTIMISATION: Invalidation intelligente du cache
+                        console.log('✏️ [Profile] Édition du profil - invalidation du cache');
                         clearCache();
                         navigate('/onboarding');
                       }}
