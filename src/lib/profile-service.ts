@@ -1,5 +1,6 @@
 import { supabase } from '../integrations/supabase/client';
 import { AstroData } from './astro';
+import { ChatGPTService } from './chatgpt-service';
 
 export interface UserProfile {
   id?: string;
@@ -117,6 +118,77 @@ export class ProfileService {
     } catch (error) {
       console.error('❌ [ProfileService] Erreur lors de la récupération du profil:', error);
       throw error;
+    }
+  }
+
+  /**
+   * Sauvegarde le profil utilisateur et lance l'analyse LLM en arrière-plan
+   */
+  static async saveUserProfileWithAnalysis(
+    profileData: Omit<UserProfile, 'id' | 'created_at' | 'updated_at'>,
+    onAnalysisComplete?: (analysis: string) => void
+  ): Promise<UserProfile> {
+    try {
+      console.log('💾 [ProfileService] Sauvegarde du profil avec analyse LLM...', profileData);
+      
+      // 1. Sauvegarder le profil
+      const savedProfile = await this.saveUserProfile(profileData);
+      
+      // 2. Lancer l'analyse LLM en arrière-plan
+      console.log('🤖 [ProfileService] Lancement de l\'analyse LLM en arrière-plan...');
+      this.generateProfileAnalysisInBackground(savedProfile, onAnalysisComplete);
+      
+      return savedProfile;
+    } catch (error) {
+      console.error('❌ [ProfileService] Erreur lors de la sauvegarde avec analyse:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Génère l'analyse de profil en arrière-plan
+   */
+  private static async generateProfileAnalysisInBackground(
+    profile: UserProfile,
+    onComplete?: (analysis: string) => void
+  ): Promise<void> {
+    try {
+      // Attendre que les données astrologiques soient disponibles
+      let astroData = profile.astro_data;
+      
+      // Si pas de données astrologiques, attendre un peu et réessayer
+      if (!astroData) {
+        console.log('⏳ [ProfileService] Attente des données astrologiques...');
+        await new Promise(resolve => setTimeout(resolve, 2000)); // Attendre 2 secondes
+        
+        // Récupérer le profil mis à jour
+        const updatedProfile = await this.getUserProfile(profile.user_id);
+        astroData = updatedProfile?.astro_data;
+      }
+      
+      if (astroData) {
+        // Préparer les données de profil pour l'analyse
+        const profileData = {
+          energy: profile.energy_time,
+          resources: profile.resource,
+          role: profile.group_role,
+          priority: profile.priority
+        };
+        
+        console.log('🔍 [ProfileService] Lancement de l\'analyse de profil...');
+        const analysis = await ChatGPTService.generateProfileAnalysis(astroData, profileData);
+        
+        if (analysis.content && onComplete) {
+          console.log('✅ [ProfileService] Analyse de profil terminée');
+          onComplete(analysis.content);
+        } else {
+          console.error('❌ [ProfileService] Erreur analyse profil:', analysis.error);
+        }
+      } else {
+        console.log('⚠️ [ProfileService] Pas de données astrologiques disponibles pour l\'analyse');
+      }
+    } catch (error) {
+      console.error('❌ [ProfileService] Erreur lors de l\'analyse de profil en arrière-plan:', error);
     }
   }
 

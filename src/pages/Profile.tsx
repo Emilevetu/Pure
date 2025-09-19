@@ -38,12 +38,12 @@ const Profile: React.FC = () => {
   const [profileLoading, setProfileLoading] = useState(true);
   const [astroLoading, setAstroLoading] = useState(false);
 
-  // Cache configuration - optimisé pour 60 minutes (données modifiées uniquement localement)
-  const CACHE_DURATION = 60 * 60 * 1000; // 60 minutes (optimisé vs 5 min)
+  // Cache configuration - lié à l'utilisateur
+  const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
   const CACHE_KEYS = {
-    profile: 'profile_cache',
-    chartsCount: 'charts_count_cache',
-    timestamp: 'profile_cache_timestamp'
+    profile: `profile_cache_${user?.id || 'anonymous'}`,
+    chartsCount: `charts_count_cache_${user?.id || 'anonymous'}`,
+    timestamp: `profile_cache_timestamp_${user?.id || 'anonymous'}`
   };
 
   // Cache functions
@@ -104,8 +104,8 @@ const Profile: React.FC = () => {
       if (loadFromCache()) {
         setIsLoading(false);
         setProfileLoading(false);
-        // 🚀 OPTIMISATION: Plus de background refresh - cache = source unique (60 min)
-        console.log('⚡ [Profile] Cache valide utilisé - pas de background refresh');
+        console.log('⚡ [Profile] Cache valide utilisé - pas de refresh redondant');
+        // Pas de refresh en arrière-plan pour éviter les appels redondants
       } else {
         // Pas de cache valide, charger normalement
         loadProfileData();
@@ -385,13 +385,19 @@ const Profile: React.FC = () => {
                   </div>
                  </CardContent>
                </Card>
-             ) : (
-               <Card className="bg-dark-blue border-gray-600">
-                 <CardContent className="p-8 text-center">
-                   <p className="text-gray-300">Aucune donnée de profil trouvée. Veuillez compléter votre onboarding.</p>
-                 </CardContent>
-               </Card>
-             )}
+            ) : (
+              <Card className="bg-dark-blue border-gray-600">
+                <CardContent className="p-8 text-center">
+                  <p className="text-gray-300 mb-4">Aucune donnée de profil trouvée.</p>
+                  <Button 
+                    onClick={() => navigate('/onboarding')}
+                    className="bg-white text-dark-blue hover:bg-gray-100 border-2 border-white"
+                  >
+                    Faire mon onboarding
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
 
             {/* Thème astral */}
             {userProfile && (

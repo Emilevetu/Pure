@@ -22,6 +22,8 @@ import {
 } from 'lucide-react';
 import { AddFriendDialog } from '@/components/friends/AddFriendDialog';
 import { useFriendsRealtime } from '@/hooks/useFriendsRealtime';
+import { ProfileService, UserProfile } from '@/lib/profile-service';
+import ResultCard from '@/components/ResultCard';
 
 interface Friend {
   friend_id: string;
@@ -51,6 +53,11 @@ const Friends: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [isAddFriendOpen, setIsAddFriendOpen] = useState(false);
   const [isNotificationOverlayOpen, setIsNotificationOverlayOpen] = useState(false);
+  
+  // États pour le profil de l'ami sélectionné
+  const [selectedFriendProfile, setSelectedFriendProfile] = useState<UserProfile | null>(null);
+  const [isLoadingFriendProfile, setIsLoadingFriendProfile] = useState(false);
+  const [selectedFriendName, setSelectedFriendName] = useState<string>('');
 
   // 🚀 Gestion des mises à jour en temps réel
   const handleFriendsRealtimeUpdate = () => {
@@ -62,13 +69,13 @@ const Friends: React.FC = () => {
   // Hook pour écouter les changements en temps réel sur la table friends
   useFriendsRealtime(handleFriendsRealtimeUpdate);
 
-  // Cache configuration
-  const CACHE_DURATION = 30 * 60 * 1000; // 30 minutes (optimisé vs 5 min)
+  // Cache configuration - lié à l'utilisateur
+  const CACHE_DURATION = 30 * 60 * 1000; // 30 minutes
   const CACHE_KEYS = {
-    friends: 'friends_cache',
-    requestsReceived: 'requests_received_cache',
-    requestsSent: 'requests_sent_cache',
-    timestamp: 'friends_cache_timestamp'
+    friends: `friends_cache_${user?.id || 'anonymous'}`,
+    requestsReceived: `requests_received_cache_${user?.id || 'anonymous'}`,
+    requestsSent: `requests_sent_cache_${user?.id || 'anonymous'}`,
+    timestamp: `friends_cache_timestamp_${user?.id || 'anonymous'}`
   };
 
   // Cache functions
@@ -298,6 +305,32 @@ const Friends: React.FC = () => {
     }
   };
 
+  // Fonction pour gérer le clic sur un ami et afficher son profil astral
+  const handleFriendClick = async (friend: Friend) => {
+    try {
+      setIsLoadingFriendProfile(true);
+      setSelectedFriendName(friend.friend_name);
+      setSelectedFriendProfile(null);
+      
+      console.log('🔍 [Friends] Chargement du profil de l\'ami:', friend.friend_name);
+      
+      const profile = await ProfileService.getUserProfile(friend.friend_id);
+      
+      if (profile) {
+        setSelectedFriendProfile(profile);
+        console.log('✅ [Friends] Profil de l\'ami chargé:', profile);
+      } else {
+        console.log('⚠️ [Friends] Aucun profil trouvé pour l\'ami:', friend.friend_name);
+        setError('Aucun profil astral trouvé pour cet ami');
+      }
+    } catch (error) {
+      console.error('❌ [Friends] Erreur lors du chargement du profil de l\'ami:', error);
+      setError('Erreur lors du chargement du profil de l\'ami');
+    } finally {
+      setIsLoadingFriendProfile(false);
+    }
+  };
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('fr-FR', {
       year: 'numeric',
@@ -373,7 +406,11 @@ const Friends: React.FC = () => {
                   {/* Bulles des amis */}
                   {friends.map((friend) => (
                     <div key={friend.friend_id} className="flex flex-col items-center space-y-2 flex-shrink-0">
-                      <div className="w-16 h-16 rounded-full bg-black border-2 border-gray-300 flex items-center justify-center cursor-pointer hover:scale-105 transition-transform">
+                      <div 
+                        className="w-16 h-16 rounded-full bg-black border-2 border-gray-300 flex items-center justify-center cursor-pointer hover:scale-105 transition-transform"
+                        onClick={() => handleFriendClick(friend)}
+                        title={`Voir le profil astral de ${friend.friend_name}`}
+                      >
                         <span className="text-white text-lg font-semibold">
                           {friend.friend_name.charAt(0).toUpperCase()}
                         </span>
@@ -590,6 +627,67 @@ const Friends: React.FC = () => {
                   )}
                 </TabsContent>
               </Tabs>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal pour afficher le profil astral de l'ami */}
+      {(selectedFriendProfile || isLoadingFriendProfile) && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
+            {/* Header de la modal */}
+            <div className="flex items-center justify-between p-6 border-b border-gray-200">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 rounded-full bg-dark-blue flex items-center justify-center">
+                  <span className="text-white font-semibold">
+                    {selectedFriendName.charAt(0).toUpperCase()}
+                  </span>
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-gray-900">
+                    Profil astral de {selectedFriendName}
+                  </h2>
+                  <p className="text-sm text-gray-500">Thème astral complet</p>
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  setSelectedFriendProfile(null);
+                  setSelectedFriendName('');
+                }}
+                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+              >
+                <X className="w-5 h-5 text-gray-500" />
+              </button>
+            </div>
+
+            {/* Contenu de la modal */}
+            <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
+              {isLoadingFriendProfile ? (
+                <div className="flex items-center justify-center py-20">
+                  <div className="flex flex-col items-center space-y-4">
+                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                    <p className="text-gray-600">Chargement du profil astral...</p>
+                  </div>
+                </div>
+              ) : selectedFriendProfile ? (
+                <ResultCard 
+                  profile={selectedFriendProfile}
+                  showSaveButton={false}
+                  showShareButton={false}
+                />
+              ) : (
+                <div className="text-center py-20">
+                  <AlertCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    Profil non trouvé
+                  </h3>
+                  <p className="text-gray-600">
+                    {selectedFriendName} n'a pas encore complété son profil astral.
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         </div>

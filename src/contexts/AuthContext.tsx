@@ -107,6 +107,25 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     const handleSessionChange = (event: string, session: Session | null) => {
       const currentUserId = session?.user?.id ?? null;
+      const lastUserId = lastHandledUserId.current;
+
+      // 🧹 NETTOYAGE: Si changement d'utilisateur, nettoyer les caches de l'ancien utilisateur
+      if (lastUserId && currentUserId !== lastUserId) {
+        console.log('🗑️ [AuthContext] Changement d\'utilisateur détecté, nettoyage des caches de l\'ancien utilisateur:', lastUserId);
+        
+        // Nettoyer le cache des amis de l'ancien utilisateur
+        localStorage.removeItem(`friends_cache_${lastUserId}`);
+        localStorage.removeItem(`requests_received_cache_${lastUserId}`);
+        localStorage.removeItem(`requests_sent_cache_${lastUserId}`);
+        localStorage.removeItem(`friends_cache_timestamp_${lastUserId}`);
+        
+        // Nettoyer le cache du profil de l'ancien utilisateur
+        localStorage.removeItem(`profile_cache_${lastUserId}`);
+        localStorage.removeItem(`charts_count_cache_${lastUserId}`);
+        localStorage.removeItem(`profile_cache_timestamp_${lastUserId}`);
+        
+        console.log('✅ [AuthContext] Caches de l\'ancien utilisateur nettoyés');
+      }
 
       // Éviter les doublons pour le même utilisateur lors de l'initialisation
       if (currentUserId && lastHandledUserId.current === currentUserId) {
@@ -287,6 +306,25 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // Fonction de déconnexion
   const logout = async () => {
     try {
+      // Nettoyer tous les caches liés à l'utilisateur actuel
+      const currentUserId = authState.user?.id;
+      if (currentUserId) {
+        console.log('🗑️ [AuthContext] Nettoyage des caches pour l\'utilisateur:', currentUserId);
+        
+        // Nettoyer le cache des amis
+        localStorage.removeItem(`friends_cache_${currentUserId}`);
+        localStorage.removeItem(`requests_received_cache_${currentUserId}`);
+        localStorage.removeItem(`requests_sent_cache_${currentUserId}`);
+        localStorage.removeItem(`friends_cache_timestamp_${currentUserId}`);
+        
+        // Nettoyer le cache du profil
+        localStorage.removeItem(`profile_cache_${currentUserId}`);
+        localStorage.removeItem(`charts_count_cache_${currentUserId}`);
+        localStorage.removeItem(`profile_cache_timestamp_${currentUserId}`);
+        
+        console.log('✅ [AuthContext] Caches nettoyés');
+      }
+      
       await supabase.auth.signOut();
       // L'état sera mis à jour par onAuthStateChange
       // Rediriger vers la page de login

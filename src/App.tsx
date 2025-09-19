@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { usePreloadData } from "@/hooks/usePreloadData";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -22,6 +23,9 @@ const queryClient = new QueryClient();
 
 const AppContent = () => {
   const location = useLocation();
+  
+  // 🚀 Précharger les données dès que l'utilisateur est connecté
+  usePreloadData();
   
   // Masquer la navigation pendant l'onboarding, login et register
   const showBottomNav = !location.pathname.startsWith('/onboarding') && 

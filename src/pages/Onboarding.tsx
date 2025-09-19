@@ -7,7 +7,6 @@ import { convertOnboardingToBirthData } from '../lib/onboarding-utils';
 import { fetchAstroData } from '../lib/astro';
 import { ProfileService } from '../lib/profile-service';
 import { useAuth } from '../contexts/AuthContext';
-import { ChatGPTService } from '../lib/chatgpt-service';
 
 interface OnboardingData {
   birthDate: string;
@@ -36,7 +35,6 @@ const Onboarding = () => {
     priority: ''
   });
   const [isPopupOpen, setIsPopupOpen] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const [showSecondText, setShowSecondText] = useState(false);
   const [profileAnalysis, setProfileAnalysis] = useState<string>('');
@@ -90,50 +88,8 @@ const Onboarding = () => {
     };
   }, [currentStep, isMounted, profileAnalysis]);
 
-  // Analyser le profil à l'étape 8
-  useEffect(() => {
-    if (currentStep !== 8 || !isMounted) return;
-    
-    const analyzeProfile = async () => {
-      setIsAnalyzing(true);
-      
-      try {
-        // Récupérer les données astrologiques depuis le profil
-        if (user?.id) {
-          const userProfile = await ProfileService.getUserProfile(user.id);
-          
-          if (userProfile?.astro_data) {
-            // Préparer les données de profil pour l'analyse
-            const profileData = {
-              energy: userProfile.energy_time,
-              resources: userProfile.resource,
-              role: userProfile.group_role,
-              priority: userProfile.priority
-            };
-            
-            console.log('🔍 [Onboarding] Lancement de l\'analyse de profil...');
-            const analysis = await ChatGPTService.generateProfileAnalysis(
-              userProfile.astro_data,
-              profileData
-            );
-            
-            if (analysis.content) {
-              setProfileAnalysis(analysis.content);
-              console.log('✅ [Onboarding] Analyse de profil terminée');
-            } else {
-              console.error('❌ [Onboarding] Erreur analyse profil:', analysis.error);
-            }
-          }
-        }
-      } catch (error) {
-        console.error('❌ [Onboarding] Erreur lors de l\'analyse de profil:', error);
-      } finally {
-        setIsAnalyzing(false);
-      }
-    };
-    
-    analyzeProfile();
-  }, [currentStep, isMounted, user?.id]);
+  // L'analyse LLM est maintenant gérée par ProfileService.saveUserProfileWithAnalysis()
+  // Plus besoin de ce useEffect
 
   // Gérer le scroll selon l'étape
   useEffect(() => {
@@ -190,40 +146,54 @@ const Onboarding = () => {
         });
     }
     
-    // Sauvegarder le profil à la fin de l'onboarding
-    if (currentStep === totalSteps) {
+    // PASSAGE IMMÉDIAT + SAUVEGARDE EN ARRIÈRE-PLAN à l'étape 7
+    if (currentStep === 7) {
       if (!user?.id) {
         console.error('❌ [Onboarding] Utilisateur non connecté');
         navigate('/login');
         return;
       }
 
-      setIsSaving(true);
-      try {
-        console.log('💾 [Onboarding] Sauvegarde du profil utilisateur...');
-        
-        await ProfileService.saveUserProfile({
-          user_id: user.id,
-          birth_date: data.birthDate,
-          birth_place: data.birthPlace,
-          birth_time: data.birthTime,
-          energy_time: data.firstName,
-          resource: data.lastName,
-          group_role: data.groupRole,
-          priority: data.priority
-        });
+      // 1. PASSAGE IMMÉDIAT à l'étape 8
+      console.log('⚡ [Onboarding] Passage immédiat à l\'étape 8');
+      setCurrentStep(8);
 
-        console.log('✅ [Onboarding] Profil sauvegardé avec succès');
-        navigate('/');
-      } catch (error) {
-        console.error('❌ [Onboarding] Erreur lors de la sauvegarde:', error);
-        // Continuer malgré l'erreur
-        navigate('/');
-      } finally {
-        setIsSaving(false);
-      }
+      // 2. SAUVEGARDE + ANALYSE LLM EN ARRIÈRE-PLAN (sans bloquer)
+      console.log('💾 [Onboarding] Sauvegarde du profil avec analyse LLM en arrière-plan...');
+      ProfileService.saveUserProfileWithAnalysis({
+        user_id: user.id,
+        birth_date: data.birthDate,
+        birth_place: data.birthPlace,
+        birth_time: data.birthTime,
+        energy_time: data.firstName,
+        resource: data.lastName,
+        group_role: data.groupRole,
+        priority: data.priority
+      }, (analysis) => {
+        // Callback appelé quand l'analyse LLM est terminée
+        console.log('✅ [Onboarding] Analyse LLM terminée, mise à jour de l\'interface');
+        setProfileAnalysis(analysis);
+      })
+        .then(() => {
+          console.log('✅ [Onboarding] Profil sauvegardé avec succès en arrière-plan');
+        })
+        .catch(error => {
+          console.error('❌ [Onboarding] Erreur lors de la sauvegarde en arrière-plan:', error);
+        });
+    }
+    // Terminer l'onboarding à l'étape 8
+    else if (currentStep === totalSteps) {
+      console.log('🏁 [Onboarding] Fin de l\'onboarding, redirection vers la page d\'accueil');
+      
+      // Invalider le cache du profil pour forcer le rechargement
+      localStorage.removeItem('profile_cache');
+      localStorage.removeItem('profile_cache_timestamp');
+      console.log('🗑️ [Onboarding] Cache du profil invalidé');
+      
+      navigate('/');
+      window.scrollTo(0, 0);
     } else {
-      // Navigation immédiate (pas d'attente)
+      // Navigation immédiate pour les autres étapes
       setCurrentStep(currentStep + 1);
     }
   };
@@ -238,6 +208,7 @@ const Onboarding = () => {
       setCurrentStep(currentStep - 1);
     } else {
       navigate('/');
+      window.scrollTo(0, 0);
     }
   };
 
@@ -669,14 +640,14 @@ const Onboarding = () => {
       <div className="fixed bottom-0 left-0 right-0 bg-black p-6">
         <button
           onClick={handleNext}
-          disabled={!isStepValid() || isSaving}
+          disabled={!isStepValid()}
           className={`w-full py-4 rounded-lg text-lg font-medium transition-colors ${
-            isStepValid() && !isSaving
+            isStepValid()
               ? 'bg-white text-black hover:bg-gray-200'
               : 'bg-gray-600 text-gray-400 cursor-not-allowed'
           }`}
         >
-          {isSaving ? 'Sauvegarde...' : (currentStep === totalSteps ? 'Terminer' : 'Suivant')}
+          {currentStep === totalSteps ? 'Terminer' : 'Suivant'}
         </button>
       </div>
 
