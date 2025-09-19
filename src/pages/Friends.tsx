@@ -672,11 +672,36 @@ const Friends: React.FC = () => {
                   </div>
                 </div>
               ) : selectedFriendProfile ? (
-                <ResultCard 
-                  profile={selectedFriendProfile}
-                  showSaveButton={false}
-                  showShareButton={false}
-                />
+                (() => {
+                  // Transform UserProfile to ResultCard props
+                  const birthData = {
+                    date: selectedFriendProfile.birth_date,
+                    time: selectedFriendProfile.birth_time,
+                    place: selectedFriendProfile.birth_place
+                  };
+                  
+                  // Check if astro_data exists and is valid
+                  if (!selectedFriendProfile.astro_data) {
+                    return (
+                      <div className="text-center py-20">
+                        <AlertCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                        <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                          Données astrales manquantes
+                        </h3>
+                        <p className="text-gray-600">
+                          {selectedFriendName} n'a pas encore ses données astrales calculées.
+                        </p>
+                      </div>
+                    );
+                  }
+                  
+                  return (
+                    <ResultCard 
+                      birthData={birthData}
+                      astroData={selectedFriendProfile.astro_data}
+                    />
+                  );
+                })()
               ) : (
                 <div className="text-center py-20">
                   <AlertCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
